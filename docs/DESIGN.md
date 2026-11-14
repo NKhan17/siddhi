@@ -1,80 +1,78 @@
-# Huddle — Style Reference
-> Pastel inventory cards on cream paper
+# Frontify — Style Reference
+> Warm atelier with orange punctuation — a museum catalog rendered in cream and ink, where a single warm orange acts as the only raised voice in an otherwise hushed room.
 
 **Theme:** light
 
 Source measurements are normalized; roles and recommendations are interpreted. Font summary lists are independent, not paired by position. HTML examples are reconstructions, not source components.
 
-Huddle uses a quiet, editorial curation language: off-white canvas, large confident headlines, and three muted pastel card colors (sage, lavender, dusty rose) that function as category tiles for project listings. The palette is intentionally desaturated — no vivid neons, no high-saturation accents — so the system reads as a considered directory rather than a marketplace. Typography is set in a single custom sans (Nng) that carries the entire information hierarchy, with all-caps micro-labels and dot-prefixed status tags adding a catalog/inventory feel. Components lean pill-shaped (100px radius on links, 1000px on primary buttons) and borders are thin 1px hairlines rather than heavy shadows, keeping the surface flat and poster-like.
+Frontify operates as an editorial brand-management workspace: a warm cream canvas (#f0f0eb) holds white card surfaces and dark teal hero moments, with a single vivid orange (#ff3b00) acting as functional punctuation rather than decorative color. Typography carries the identity — a high-contrast serif display face (Cranny) sets an editorial, near-print tone at 40–96px, while a clean grotesque (ABC Diatype) handles all interface text at 14–18px with positive tracking. The system avoids heavy shadows and gradients, relying on warm neutrals, hairline borders, and comfortable 8px-base spacing to create a calm, considered density. Components feel lightweight: 8px card radii, pill buttons at 24–40px, ghost controls, and image-forward compositions where brand assets become the hero content.
 
 ## Tokens — Colors
 
 | Name | Value | Token | Role |
 |------|-------|-------|------|
-| Paper White | `#ffffff` | `--color-paper-white` | Page canvas, card base, text on dark cards — the dominant surface |
-| Ink Black | `#151515` | `--color-ink-black` | Dark borders and separators for elevated surfaces and inverted UI. Do not promote it to the primary CTA color |
-| Graphite | `#23241f` | `--color-graphite` | Secondary text, subtle borders |
-| Slate Gray | `#3a4444` | `--color-slate-gray` | Muted text, inactive tags, form labels |
-| Stone Border | `#333333` | `--color-stone-border` | Hairline borders, dividers, card outlines |
-| Mist Gray | `#808080` | `--color-mist-gray` | Tertiary text, disabled states |
-| Bone | `#e5e6e1` | `--color-bone` | Soft surface tint, secondary card backgrounds |
-| Pale Sage | `#d3e5e9` | `--color-pale-sage` | Hairline borders, dividers, input outlines, and card edges on light surfaces. |
-| Lavender Mist | `#bbb2ce` | `--color-lavender-mist` | Lavender card variant — secondary project category, tag fills |
-| Dusty Rose | `#cb9da2` | `--color-dusty-rose` | Red state accent for badges, validation surfaces, and short status labels. |
-| Deep Violet | `#453b60` | `--color-deep-violet` | Violet accent for outlined action borders, linked labels, and lightweight interactive emphasis. |
-| Burnt Amber | `#65451d` | `--color-burnt-amber` | Warm brown border accent on tags and badges — the signature warm neutral that anchors the cool pastels |
-| Honey Gold | `#e4b976` | `--color-honey-gold` | Gold accent for tag text, highlighted labels — the single warm highlight color |
-| Burgundy | `#5c2529` | `--color-burgundy` | Error/status red — badge backgrounds and warning borders |
-| Blush Border | `#d79caa` | `--color-blush-border` | Soft pink border accent for rose-category cards and tags |
+| Warm Parchment | `#f0f0eb` | `--color-warm-parchment` | Page canvas, hero section dividers, large surface fills — warm cream replaces stark white to soften the entire interface |
+| Gallery White | `#ffffff` | `--color-gallery-white` | Card surfaces, elevated panels, button text on dark fills — pure white reserved for objects sitting on the cream canvas |
+| Soft Linen | `#e1e1db` | `--color-soft-linen` | Secondary card surface, subtle background fills behind grouped content |
+| Mist Gray | `#d7d7cf` | `--color-mist-gray` | Subtle background fills, body section dividers |
+| Pale Stone | `#cbcbc5` | `--color-pale-stone` | Light hairline borders on neutral surfaces |
+| Ash Gray | `#bfbfb8` | `--color-ash-gray` | Icon strokes, secondary borders, muted decorative elements |
+| Graphite Warm | `#575753` | `--color-graphite-warm` | Secondary card text, muted card labels |
+| Charcoal Warm | `#464643` | `--color-charcoal-warm` | Body-level borders, secondary text on warm surfaces |
+| Ink | `#111110` | `--color-ink` | Primary text, hairline borders across all surfaces, filled button background — the structural neutral that carries nearly all interface weight |
+| Signal Orange | `#ff3b00` | `--color-signal-orange` | Sole chromatic accent — highlights, active tags, icon fills, decorative punctuation. Used sparingly to make functional moments feel switched on against the warm monochrome |
+| Deep Teal | `#042a2b` | `--color-deep-teal` | Gray outline accent for tags, dividers, and focused UI edges. |
 
 ## Tokens — Typography
 
-### Nng — Primary typeface across all contexts: display headlines (44–69px, weight 300–400), headings (22–29px, weight 500), body (14–18px, weight 400), captions and micro-labels (12–13px, weight 500, uppercase). Custom geometric sans with tight tracking on large sizes (-0.021em at 69px) — the slight negative tracking makes the large display headlines feel dense and poster-like rather than airy. · `--font-nng`
-- **Substitute:** Inter, Söhne, or Untitled Sans
-- **Weights:** 300, 400, 500, 700
-- **Sizes:** 12px, 13px, 14px, 15px, 16px, 18px, 21px, 22px, 29px, 40px, 44px, 69px
-- **Line height:** 1.10 – 1.58
-- **Letter spacing:** -0.021em at 69px, -0.011em at 29–40px, -0.010em at 22px, -0.008em at 16–18px
-- **OpenType features:** `"ss01" on, "tnum" on`
-- **Role:** Primary typeface across all contexts: display headlines (44–69px, weight 300–400), headings (22–29px, weight 500), body (14–18px, weight 400), captions and micro-labels (12–13px, weight 500, uppercase). Custom geometric sans with tight tracking on large sizes (-0.021em at 69px) — the slight negative tracking makes the large display headlines feel dense and poster-like rather than airy.
+### Cranny — Display and editorial heading face — high-contrast serif used for hero headlines and section titles at 40–96px. Weight 300 at display sizes creates a whisper-soft authority; weight 400 carries through subheadings. This is the brand's typographic signature: an editorial serif in a sea of SaaS grotesques. · `--font-cranny`
+- **Substitute:** Fraunces, Playfair Display, or DM Serif Display
+- **Weights:** 300, 400
+- **Sizes:** 16, 18, 20, 24, 28, 32, 40, 61, 80, 96px
+- **Line height:** 0.91, 1.00, 1.10, 1.30, 1.50
+- **Letter spacing:** -0.0070em at display (80–96px), 0.0100em at small sizes
+- **Role:** Display and editorial heading face — high-contrast serif used for hero headlines and section titles at 40–96px. Weight 300 at display sizes creates a whisper-soft authority; weight 400 carries through subheadings. This is the brand's typographic signature: an editorial serif in a sea of SaaS grotesques.
 
-### Roboto — Secondary system font used sparingly — likely for rendered user content (descriptions, quotes) where a neutral fallback is needed. Weight 400 only, tight tracking (-0.103em) gives it a condensed feel. · `--font-roboto`
-- **Substitute:** system-ui, -apple-system
-- **Weights:** 400
-- **Sizes:** 14px, 16px
-- **Line height:** 1.25, 1.43
-- **Letter spacing:** -0.1030em
-- **Role:** Secondary system font used sparingly — likely for rendered user content (descriptions, quotes) where a neutral fallback is needed. Weight 400 only, tight tracking (-0.103em) gives it a condensed feel.
+### ABC Diatype — Primary interface and body text — neutral grotesque handling nav, buttons, inputs, body copy, and card labels. The +0.01em positive tracking is unusually generous for a grotesque and creates a calm, considered rhythm in body text. · `--font-abc-diatype`
+- **Substitute:** Inter, Söhne, or GT America
+- **Weights:** 400, 500
+- **Sizes:** 14, 18px
+- **Line height:** 1.00, 1.30, 1.35, 1.50
+- **Letter spacing:** 0.0100em (0.14px at 14px, 0.18px at 18px)
+- **Role:** Primary interface and body text — neutral grotesque handling nav, buttons, inputs, body copy, and card labels. The +0.01em positive tracking is unusually generous for a grotesque and creates a calm, considered rhythm in body text.
 
-### Apercu pro mono — Monospaced accent — used for code-like or identifier text (project IDs, timestamps). Normal letter-spacing distinguishes it from the proportional Nng. · `--font-apercu-pro-mono`
-- **Substitute:** JetBrains Mono, IBM Plex Mono
-- **Weights:** 400
-- **Sizes:** 14px
-- **Line height:** 1.42
-- **Role:** Monospaced accent — used for code-like or identifier text (project IDs, timestamps). Normal letter-spacing distinguishes it from the proportional Nng.
-
-### Moderat — Moderat — detected in extracted data but not described by AI · `--font-moderat`
+### Satoshi — Secondary body fallback for specific micro-copy contexts · `--font-satoshi`
+- **Substitute:** DM Sans or Manrope
 - **Weights:** 400
 - **Sizes:** 14px
-- **Line height:** 1.2, 1.5
-- **Letter spacing:** -0.021
-- **Role:** Moderat — detected in extracted data but not described by AI
+- **Line height:** 1.30
+- **Letter spacing:** 0.0100em
+- **Role:** Secondary body fallback for specific micro-copy contexts
+
+### Cabinetgrotesk — Bold display variant for emphasis and large numerals — tighter, heavier counterpoint to the editorial Cranny · `--font-cabinetgrotesk`
+- **Substitute:** Cabinet Grotesk (Indus Type) or General Sans Bold
+- **Weights:** 500, 700
+- **Sizes:** 16, 40px
+- **Line height:** 1.00, 1.20
+- **Letter spacing:** 0.0100em
+- **Role:** Bold display variant for emphasis and large numerals — tighter, heavier counterpoint to the editorial Cranny
 
 ### Type Scale
 
 | Role | Family | Weight | Size | Line Height | Letter Spacing | Token |
 |------|--------|--------|------|-------------|----------------|-------|
-| micro | — | — | 12px | 1.58 | 0px | `--text-micro` |
-| caption | — | — | 14px | 1.5 | -0.01px | `--text-caption` |
-| body-sm | — | — | 16px | 1.45 | -0.13px | `--text-body-sm` |
-| body | — | — | 18px | 1.42 | -0.14px | `--text-body` |
-| subheading | — | — | 22px | 1.32 | -0.22px | `--text-subheading` |
-| heading-sm | — | — | 29px | 1.3 | -0.32px | `--text-heading-sm` |
-| heading | — | — | 40px | 1.22 | -0.48px | `--text-heading` |
-| heading-lg | — | — | 44px | 1.2 | -0.92px | `--text-heading-lg` |
-| display | — | — | 69px | 1.1 | -1.45px | `--text-display` |
+| caption | — | — | 14px | 1.3 | 0.14px | `--text-caption` |
+| body | — | — | 18px | 1.35 | 0.18px | `--text-body` |
+| subheading | — | — | 24px | 1.3 | 0.24px | `--text-subheading` |
+| heading-sm | — | — | 32px | 1.2 | 0.32px | `--text-heading-sm` |
+| heading | — | — | 40px | 1.1 | 0.4px | `--text-heading` |
+| heading-lg | — | — | 61px | 1 | -0.43px | `--text-heading-lg` |
+| display | — | — | 80px | 0.95 | -0.56px | `--text-display` |
+| display-xl | — | — | 96px | 0.91 | -0.67px | `--text-display-xl` |
 
 ## Tokens — Spacing & Shapes
+
+**Base unit:** 8px
 
 **Density:** comfortable
 
@@ -82,203 +80,168 @@ Huddle uses a quiet, editorial curation language: off-white canvas, large confid
 
 | Name | Value | Token |
 |------|-------|-------|
-| 4 | 4px | `--spacing-4` |
-| 5 | 5px | `--spacing-5` |
-| 6 | 6px | `--spacing-6` |
 | 8 | 8px | `--spacing-8` |
-| 10 | 10px | `--spacing-10` |
-| 12 | 12px | `--spacing-12` |
-| 14 | 14px | `--spacing-14` |
 | 16 | 16px | `--spacing-16` |
-| 18 | 18px | `--spacing-18` |
-| 20 | 20px | `--spacing-20` |
 | 24 | 24px | `--spacing-24` |
 | 32 | 32px | `--spacing-32` |
 | 40 | 40px | `--spacing-40` |
 | 48 | 48px | `--spacing-48` |
-| 96 | 96px | `--spacing-96` |
-| 144 | 144px | `--spacing-144` |
+| 64 | 64px | `--spacing-64` |
+| 80 | 80px | `--spacing-80` |
+| 128 | 128px | `--spacing-128` |
+| 160 | 160px | `--spacing-160` |
 
 ### Border Radius
 
 | Element | Value |
 |---------|-------|
-| tags | 100px |
+| tags | 9999px |
 | cards | 8px |
-| pills | 100px |
-| badges | 4px |
-| buttons | 1000px |
-| list-items | 24px |
-| large-cards | 40px |
+| images | 18px |
+| nav-pills | 32px |
+| buttons-lg | 40px |
+| buttons-sm | 24px |
 
 ### Layout
 
 - **Page max-width:** 1200px
-- **Section gap:** 64px
-- **Card padding:** 24px
-- **Element gap:** 12px
+- **Section gap:** 80px
+- **Card padding:** 32px
+- **Element gap:** 8-16px
 
 ## Components
 
-### Primary Pill Button
-**Role:** Main call-to-action (e.g., 'Get started')
+### Top Navigation Bar
+**Role:** Persistent site navigation
 
-Black fill (#151515), white text, 1000px border-radius (fully rounded), padding 16px 24px, Nng at 16px weight 500. No shadow, no border. The extra-rounded shape against the muted palette gives it weight without aggression.
+Horizontal bar on #f0f0eb background. Left: logo + dropdown menu items (Platform, Customers, Partnerships, Resources). Right: text link (Pricing), language selector (EN), ghost Login button (outlined pill, 32px radius), and filled Demo button (Ink #111110, white text, 32px radius, 12px 20px padding). Height ~64px.
 
-### Ghost Text Link
-**Role:** Secondary action (e.g., 'Apply as a designer')
+### Dark Hero Section
+**Role:** Primary landing section
 
-No background, no border. Nng 16px weight 400, color #151515 with underline on hover. Sits beside the primary button at equal visual weight through spacing, not styling.
+Full-bleed #042a2b background with centered content. Display heading at 80–96px Cranny weight 300, white text, -0.67px letter-spacing. Subtext at 18px ABC Diatype weight 400, white at ~80% opacity. Button row below with 16px gap. Optional centered product preview image with 18px radius and 80% width constraint.
 
-### Outlined Action Button
-**Role:** Tertiary action, less emphasis than primary
+### Filled Dark Button
+**Role:** Primary action
 
-Transparent background, 1px border in #151515 or accent color, 100px radius, padding 12px 20px, Nng 14px weight 500. Used for 'Get started' in secondary contexts.
+Ink (#111110) background, white text, ABC Diatype 14px weight 500, 0.14px letter-spacing. Padding 12px 20px, border-radius 24px (compact) or 40px (large). No border, no shadow. Used for 'Book demo' and 'Demo' CTAs.
 
-### Project Card — Sage Variant
-**Role:** Category tile for 'upcoming' or 'monitoring' projects
+### Ghost Button
+**Role:** Secondary action
 
-Background #d3e5e9 (pale sage), 1px hairline border #333333, 8px radius, padding 24px. Status label in uppercase Nng 12px weight 500 (e.g., 'COMING MONTHLY') in #3a4444. Project title in Nng 22px weight 500, color #151515. Tag pills inline at the bottom.
+Transparent background with 1px border in white (on dark hero) or Ink (on light sections). ABC Diatype 14px weight 400, 0.14px letter-spacing. Padding 12px 20px, border-radius 24px. Includes optional arrow icon (▷) after label. Used for 'See the platform', 'Login'.
 
-### Project Card — Lavender Variant
-**Role:** Category tile for secondary projects
+### Logo Bar
+**Role:** Social proof / partner display
 
-Background #bbb2ce (lavender mist), 1px hairline border #333333, 8px radius, padding 24px. Same structure as sage variant. Title in Nng 22px weight 500.
+Horizontal row of partner logos on cream canvas, evenly distributed. Logos in black or grayscale, no color treatment. Comfortable spacing between logos, sits as a full-width strip between hero and feature sections.
 
-### Project Card — Dusty Rose Variant
-**Role:** Category tile for 'shipped' or 'completed' projects
+### Feature Heading Block
+**Role:** Section introduction
 
-Background #cb9da2 (dusty rose), 1px hairline border #333333, 8px radius, padding 24px. Title in Nng 22px weight 500. Slightly warmer feel than the cool sage/lavender.
+Centered text stack on cream canvas. Heading at 40–61px Cranny weight 300–400, Ink color. Subtext at 18px ABC Diatype weight 400, Graphite (#575753). Gap between heading and subtext: 16–24px. Section padding: 80px vertical.
 
-### Active Project Card
-**Role:** Currently-in-progress project, higher emphasis
+### Upload Drop Zone
+**Role:** File interaction surface
 
-Lavender-tinted card with deep violet text (#453b60) instead of black. Signals 'live' status. Nng 22px weight 500, 'ACTIVE' label prefix in uppercase.
+Dashed border (1px, #cbcbc5), cream background, 8px radius. Centered icon + label stack. ABC Diatype 18px weight 400 for label, Graphite color. Minimum height ~320px.
 
-### Status Tag Pill
-**Role:** Small inline label (e.g., 'Probiotics', 'Brand Designer')
+### Media Library Card
+**Role:** Content container for image grid
 
-100px border-radius, padding 4px 12px, Nng 13–14px weight 500, background #ffffff or light fill, 1px border in #65451d (burnt amber) or accent color. Text color matches border. The burnt-amber border is the signature warm accent that ties the tag system together.
+White (#ffffff) surface, 8px radius, 32px internal padding. Contains breadcrumb header (Nobrand > Libraries > Media in 14px ABC Diatype, #575753 with chevron separators) and 4×2 image grid below.
 
-### Step Section Header
-**Role:** Section divider labeling process steps
+### Overlapping Image Tile
+**Role:** Gallery thumbnail
 
-All-caps Nng 12px weight 500, color #151515, preceded by a small bullet (•) or step number. Examples: 'STEP 1: THE BRIEF', 'STEP 2: THE TEAM'. Left-aligned, tight tracking, 16px+ bottom margin.
+18px border-radius, no border. Arranged in grid with 2–3° random rotation and ~8px overlap between adjacent tiles. Creates a casual, editorial scrapbook feel rather than a rigid grid.
 
-### Testimonial Card
-**Role:** Social proof, quote from a past client
+### Pill Tag
+**Role:** Filter or metadata label
 
-White background, 1px border #e5e6e1, 8px radius, padding 16px. Quote text in Nng 16px weight 400 italic, color #3a4444. Attribution below: avatar (40px circle) + name (Nng 16px weight 500) + role (Nng 14px weight 400, #808080).
+White background, 1px border in Pale Stone (#cbcbc5), ABC Diatype 12–14px weight 400, Ink text. Fully rounded (9999px radius). Padding 6px 12px. Used for format tags (PNG) and action labels (Magic hour).
 
-### Team Forming Tag
-**Role:** Role label inside project cards (e.g., 'Brand Designer')
+### Breadcrumb
+**Role:** Navigation path indicator
 
-Outlined pill with #453b60 (deep violet) border, 100px radius, padding 6px 12px, Nng 14px weight 500. The violet outline distinguishes 'needed roles' from 'filled roles' (which use a different fill).
+Inline horizontal list, 14px ABC Diatype weight 400. Items in Graphite (#575753) separated by chevron (›) in Ash Gray (#bfbfb8). First item preceded by small logo icon. No background, sits at top of content cards.
 
-### Beta Banner
-**Role:** Top-of-page announcement strip
+### CTA Card with Glass Overlay
+**Role:** Action prompt on image
 
-Centered text, Nng 13px weight 500, white background, 'Private Beta' in a outlined pill (1px border #151515, 100px radius, padding 2px 8px) followed by descriptive text in #3a4444. Sits flush at the very top of the page.
-
-### Avatar Group
-**Role:** Visual representation of the team inline in headlines
-
-Three overlapping circular avatars (40px each, -12px overlap), 1px white border between them. Placed inline within display text as a visual device — the faces ARE the headline punctuation.
+Semi-transparent panel (rgba(255,255,255,0.85)) with 18px radius overlaid on hero photography. Contains pill tags and a Signal Orange action button. The orange button is a small square with rounded corners (8px) and a white sparkle/star icon — the only place where orange carries visual weight.
 
 ## Do's and Don'ts
 
 ### Do
-- Use the three pastel card colors (sage #d3e5e9, lavender #bbb2ce, dusty rose #cb9da2) as a fixed category system — assign one to each project status and never mix within a single card.
-- Set all tag pills and secondary buttons to 100px border-radius; reserve 1000px exclusively for the primary action button to create a clear hierarchy between fully rounded and pill-rounded.
-- Use Nng at weight 300–400 for display headlines (44px+); the light weight on large sizes is the signature — bold display text would break the editorial register.
-- Prefix all section labels with a bullet or step number in uppercase 12px Nng ('• STEP 1: THE BRIEF'); this micro-label system is the primary wayfinding device.
-- Pair burnt amber (#65451d) borders with honey gold (#e4b976) text on tags — this warm-on-warm combination is the only place gold appears, so it reads as a highlight, not decoration.
-- Maintain 1px hairline borders in #333333 or #e5e6e1 on all cards; never use box-shadow for elevation — the system is intentionally flat.
-- Keep the canvas at #ffffff with generous 64px section gaps; the lightness and breathing room are what make the pastel cards legible.
+- Use Cranny weight 300 for all display headlines — the whisper-soft serif is the brand's typographic signature
+- Set all interface text in ABC Diatype with 0.0100em positive tracking (0.14px at 14px, 0.18px at 18px)
+- Use #f0f0eb Warm Parchment as the page canvas; reserve #ffffff Gallery White exclusively for cards sitting on the canvas
+- Apply 8px radius to all content cards, 24–40px radius to buttons (24px compact, 40px hero-scale)
+- Use #ff3b00 Signal Orange only for small functional moments (active tags, icon accents, single CTA button) — never for large fills or backgrounds
+- Maintain 80px section gaps on the cream canvas; use the dark #042a2b surface sparingly for full-bleed editorial moments
+- Separate components with 1px hairline borders in Ink (#111110) rather than drop shadows
 
 ### Don't
-- Do not use box-shadow for card elevation — the system is flat by design, relying on hairline borders and background color contrast for separation.
-- Do not introduce vivid or saturated colors (no electric blue, neon green, or pure red); all accent colors are muted and desaturated by design.
-- Do not set display headlines in bold (weight 600+); Nng weight 300–400 on large sizes is the editorial signature — bold headlines would look like a different product.
-- Do not use the same radius for all elements; the 100px pills vs. 8px cards vs. 1000px primary button create a deliberate visual rhythm of corner treatments.
-- Do not place white text on pastel card backgrounds; the card titles should always be #151515 or #453b60 (deep violet for active) for contrast and consistency.
-- Do not use more than two font families in a single view; Nng carries 95% of the system, Roboto appears only in rendered user content.
-- Do not center-align body text or descriptions; left-align everything below the display headline to maintain the editorial/document feel.
+- Don't use drop shadows or elevation stacks — depth comes from warm neutral layering and hairline borders only
+- Don't use Cranny for body text or interface labels — it is a display face only; pair with ABC Diatype
+- Don't apply Signal Orange to large fills, page sections, or text — it loses meaning when used at scale
+- Don't use pure #000000 for text or borders — Ink (#111110) is the structural black; reserve #000000 for SVG fills only
+- Don't center-align body copy or multi-line text longer than 60 characters — display headlines and short labels only
+- Don't use standard 4px or 6px radii on cards — the system uses 8px minimum for content surfaces
+- Don't introduce additional chromatic accents; the system is warm-monochrome with one orange voice
 
 ## Surfaces
 
 | Level | Name | Value | Purpose |
 |-------|------|-------|---------|
-| 1 | Paper White | `#ffffff` | Base page canvas and most card surfaces |
-| 2 | Bone | `#e5e6e1` | Secondary card surface, subtle background tint |
-| 3 | Lavender Mist | `#bbb2ce` | Lavender category card fill |
-| 4 | Pale Sage | `#d3e5e9` | Sage category card fill |
-| 5 | Dusty Rose | `#cb9da2` | Rose category card fill |
+| 0 | Canvas | `#f0f0eb` | Base page background — warm cream replaces stark white |
+| 1 | Card | `#ffffff` | Content cards, feature panels sitting on the canvas |
+| 2 | Elevated Card | `#e1e1db` | Secondary grouped content, subtle background variation |
+| 3 | Dark Surface | `#042a2b` | Hero sections and editorial dark moments |
 
 ## Elevation
 
-The design system intentionally avoids box-shadows. All elevation is achieved through background color contrast and 1px hairline borders (#333333, #e5e6e1). Cards on the white canvas rely on the pastel background fill (sage, lavender, rose) to create visual separation. This flat treatment reinforces the editorial/poster aesthetic and prevents the interface from feeling like a generic SaaS dashboard.
+The system deliberately avoids drop shadows as a structural tool. Depth is communicated through warm neutral layering (#f0f0eb → #ffffff → #e1e1db), hairline borders in #111110, and the occasional dark-teal surface (#042a2b) for dramatic contrast. Components sit on flat planes separated by 1px borders rather than lifted by shadow.
 
 ## Imagery
 
-Imagery is minimal and functional: circular avatar photos (40–56px, 1px white border) used inline within text and in testimonial cards. No hero photography, no product screenshots, no decorative illustration. The visual weight comes from the pastel card system itself — the cards act as the imagery, each one a colored tile showcasing a real project. Icons are absent or extremely minimal (small bullet/dot glyphs only).
+Image-forward and editorial: full-bleed cinematic photography in dark hero sections (lifestyle, atmospheric, often silhouetted figures against skies), contained 18px-radius image grids with slight rotation and overlap (2 rows of 4 in the media library view), and brand-asset thumbnails presented as gallery objects. Photography is warm-toned, high-contrast, and treated as content rather than decoration — the images ARE the page, not illustrations of it. No flat illustration system; visuals are either photographic or absent.
 
 ## Layout
 
-Single-column page model with a centered max-width ~1200px container. The hero is a two-column split: left side holds the large display headline with inline avatar group and primary CTA, right side stacks 3–4 pastel project cards vertically as a live feed. Below the hero, the page flows as numbered process steps (STEP 1, STEP 2, …) in a two-column pattern: left column is instructional text with optional testimonial, right column is a feature card. Section rhythm is generous (64px gaps) with no alternating dark/light bands — everything stays on white. Navigation is a single wordmark logo (HUDDLE, all-caps, tight tracking) in the top-left, no nav links visible. The right-edge project feed persists in view as a sidebar-like element.
+Max-width 1200px centered content on a warm cream canvas. The page opens with a full-bleed dark hero (#042a2b background) containing a centered serif headline at 80–96px, a subtext line, and two buttons (filled + ghost). Below, sections alternate on the cream canvas with generous 80px vertical gaps. Logo bars sit as horizontal strips with comfortable spacing. Feature sections use centered headline → subtext → visual stack. The media library view shows a 4×2 image grid with intentional 2–3° rotation and overlap between tiles, framed by a single rounded card container.
 
 ## Agent Prompt Guide
 
-Quick Color Reference:
-- text primary: #151515
-- background: #ffffff
-- border: #333333
-- accent (card sage): #d3e5e9
-- accent (card lavender): #bbb2ce
-- accent (card rose): #cb9da2
-- brand (active violet): #453b60
-- tag border: #65451d
-- primary action: #65451d (filled action)
+## Quick Color Reference
+- Canvas/page background: #f0f0eb (Warm Parchment)
+- Card surface: #ffffff (Gallery White)
+- Primary text & borders: #111110 (Ink)
+- Secondary text: #575753 (Graphite Warm)
+- Dark hero surface: #042a2b (Deep Teal)
+- Accent (small functional moments only): #ff3b00 (Signal Orange)
+- primary action: #111110 (filled action)
 
-3-5 Example Component Prompts:
+## Example Component Prompts
 
-1. Create a Primary Action Button: #65451d background, #ffffff text, 9999px radius, compact pill padding. Use this filled treatment for the main CTA.
+1. **Dark Hero Section**: Full-bleed #042a2b background, centered. Display headline at 80px Cranny weight 300, #ffffff, letter-spacing -0.56px. Subtext at 18px ABC Diatype weight 400, white at 85% opacity. Two buttons below with 16px gap: filled Ink (#111110, white text, 24px radius, 12px 20px padding) and ghost (transparent, 1px white border, white text, 24px radius, 12px 20px padding).
 
-2. Create a project card grid: three cards stacked vertically, each 8px radius, 24px padding, 1px border #333333. Card 1: background #d3e5e9 (sage), uppercase 12px Nng 'COMING MONTHLY' label, title 'OneMedical for psychedelic and naturopathic therapists' in Nng 22px weight 500 #151515, three tag pills at bottom (100px radius, 1px border #65451d, text #e4b976). Card 2: background #bbb2ce (lavender), same structure. Card 3: background #cb9da2 (rose), same structure with 'SHIPPED' label.
+2. **Feature Section Block**: Cream #f0f0eb background, 80px vertical padding. Centered heading at 40px Cranny weight 400, #111110, 0.40px letter-spacing. Subtext at 18px ABC Diatype weight 400, #575753, 16px gap below heading. Max content width 640px.
 
+3. **Media Library Card**: White #ffffff surface, 8px radius, 32px padding. Breadcrumb at top in 14px ABC Diatype #575753 separated by › in #bfbfb8. Below: 4-column image grid with 18px-radius tiles, 8px gaps, optional 2–3° rotation on each tile.
 
-4. Create a testimonial card: white background, 1px border #e5e6e1, 8px radius, 16px padding. Quote in Nng 16px weight 400 italic #3a4444. Attribution row: 40px circular avatar + 'Krystin Hargrove' in Nng 16px weight 500 + 'Founder at CoTripper' in Nng 14px weight 400 #808080.
+4. **Top Navigation Bar**: #f0f0eb background, 64px height. Left cluster: logo + ABC Diatype 14px weight 500 nav items in #111110 with 24px gaps. Right cluster: text link (Pricing), language selector, ghost Login button (1px #111110 border, 32px radius, 12px 16px padding), filled Demo button (#111110 bg, white text, 32px radius, 12px 16px padding).
 
-5. Create a tag pill: 100px border-radius, 1px solid border #65451d, padding 4px 12px, text in Nng 13px weight 500, text color #65451d (or #e4b976 for highlighted tags). No background fill.
-
-## Color Card Category System
-
-The three pastel card colors are not arbitrary decoration — they form a fixed status taxonomy:
-- Sage (#d3e5e9 background): 'COMING MONTHLY' — projects being monitored or upcoming
-- Lavender (#bbb2ce background): 'BUILDING' or general/secondary — projects in formation
-- Dusty Rose (#cb9da2 background): 'SHIPPED' — completed projects
-- Deep Violet (#453b60 text on lavender): 'ACTIVE' — the currently live project, elevated within the lavender category by text color alone
-
-This color-to-status mapping should be preserved across all project listings. Swapping card colors breaks the system's categorical meaning.
-
-## Border Radius Vocabulary
-
-The design uses a deliberate vocabulary of border radii, each with semantic meaning:
-- 4px: small badges, inline labels, micro-elements
-- 8px: standard cards, testimonial blocks, content containers
-- 24px: list items, expanded cards with more visual weight
-- 40px: hero/feature cards (e.g., the right-column 'CREATING HUDDLE' card)
-- 100px: tag pills, secondary buttons, inline role labels
-- 1000px: primary action button only — the fully rounded 'Get started' pill
-
-Never use 0px (sharp corners) — even the smallest badges get 4px. The progression from 4px → 1000px is a hierarchy of prominence.
+5. **Pill Tag Filter**: White background, 1px border in #cbcbc5, 9999px radius, 6px 12px padding. ABC Diatype 14px weight 400 in #111110. For the orange variant: #ff3b00 background, white text, no border, 8px radius (square-ish, not pill) with a small white sparkle icon.
 
 ## Similar Brands
 
-- **Read.cv** — Same flat editorial layout with a single custom sans typeface, left-aligned text, and minimal use of color — both treat the page like a document rather than a product page.
-- **Are.na** — Similar muted/desaturated palette with pastel-tinted cards, generous whitespace, and a curatorial/archival sensibility over aggressive product marketing.
-- **Craigslist redesigns (e.g., Minimal Craigslist)** — Same category-card aesthetic where each listing is a colored tile with a status indicator and tag pills — the design language of a structured directory.
-- **Linear** — Both use a single custom sans, tight letter-spacing on large display sizes, pill-shaped buttons at 100px radius, and a restrained dark-on-light color palette with one or two accent colors.
+- **Webflow** — Same dark-hero-into-light-sections rhythm with large editorial display type and warm neutrals
+- **Linear** — Comfortable 8px-base density, hairline borders on flat surfaces, and restraint around color
+- **Pitch** — Editorial serif headlines paired with a single warm accent color and image-forward presentations
+- **Arc Browser** — Warm cream canvas with deep dark contrast sections and oversized editorial typography
+- **Notion** — Comfortable spacing, soft card radii, and a calm near-monochrome palette with minimal elevation
 
 ## Quick Start
 
@@ -287,56 +250,49 @@ Never use 0px (sharp corners) — even the smallest badges get 4px. The progress
 ```css
 :root {
   /* Colors */
-  --color-paper-white: #ffffff;
-  --color-ink-black: #151515;
-  --color-graphite: #23241f;
-  --color-slate-gray: #3a4444;
-  --color-stone-border: #333333;
-  --color-mist-gray: #808080;
-  --color-bone: #e5e6e1;
-  --color-pale-sage: #d3e5e9;
-  --color-lavender-mist: #bbb2ce;
-  --color-dusty-rose: #cb9da2;
-  --color-deep-violet: #453b60;
-  --color-burnt-amber: #65451d;
-  --color-honey-gold: #e4b976;
-  --color-burgundy: #5c2529;
-  --color-blush-border: #d79caa;
+  --color-warm-parchment: #f0f0eb;
+  --color-gallery-white: #ffffff;
+  --color-soft-linen: #e1e1db;
+  --color-mist-gray: #d7d7cf;
+  --color-pale-stone: #cbcbc5;
+  --color-ash-gray: #bfbfb8;
+  --color-graphite-warm: #575753;
+  --color-charcoal-warm: #464643;
+  --color-ink: #111110;
+  --color-signal-orange: #ff3b00;
+  --color-deep-teal: #042a2b;
 
   /* Typography — Font Families */
-  --font-nng: 'Nng', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-roboto: 'Roboto', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-apercu-pro-mono: 'Apercu pro mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-moderat: 'Moderat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-cranny: 'Cranny', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-abc-diatype: 'ABC Diatype', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-satoshi: 'Satoshi', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-cabinetgrotesk: 'Cabinetgrotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Typography — Scale */
-  --text-micro: 12px;
-  --leading-micro: 1.58;
-  --tracking-micro: 0px;
   --text-caption: 14px;
-  --leading-caption: 1.5;
-  --tracking-caption: -0.01px;
-  --text-body-sm: 16px;
-  --leading-body-sm: 1.45;
-  --tracking-body-sm: -0.13px;
+  --leading-caption: 1.3;
+  --tracking-caption: 0.14px;
   --text-body: 18px;
-  --leading-body: 1.42;
-  --tracking-body: -0.14px;
-  --text-subheading: 22px;
-  --leading-subheading: 1.32;
-  --tracking-subheading: -0.22px;
-  --text-heading-sm: 29px;
-  --leading-heading-sm: 1.3;
-  --tracking-heading-sm: -0.32px;
+  --leading-body: 1.35;
+  --tracking-body: 0.18px;
+  --text-subheading: 24px;
+  --leading-subheading: 1.3;
+  --tracking-subheading: 0.24px;
+  --text-heading-sm: 32px;
+  --leading-heading-sm: 1.2;
+  --tracking-heading-sm: 0.32px;
   --text-heading: 40px;
-  --leading-heading: 1.22;
-  --tracking-heading: -0.48px;
-  --text-heading-lg: 44px;
-  --leading-heading-lg: 1.2;
-  --tracking-heading-lg: -0.92px;
-  --text-display: 69px;
-  --leading-display: 1.1;
-  --tracking-display: -1.45px;
+  --leading-heading: 1.1;
+  --tracking-heading: 0.4px;
+  --text-heading-lg: 61px;
+  --leading-heading-lg: 1;
+  --tracking-heading-lg: -0.43px;
+  --text-display: 80px;
+  --leading-display: 0.95;
+  --tracking-display: -0.56px;
+  --text-display-xl: 96px;
+  --leading-display-xl: 0.91;
+  --tracking-display-xl: -0.67px;
 
   /* Typography — Weights */
   --font-weight-light: 300;
@@ -345,54 +301,46 @@ Never use 0px (sharp corners) — even the smallest badges get 4px. The progress
   --font-weight-bold: 700;
 
   /* Spacing */
-  --spacing-4: 4px;
-  --spacing-5: 5px;
-  --spacing-6: 6px;
+  --spacing-unit: 8px;
   --spacing-8: 8px;
-  --spacing-10: 10px;
-  --spacing-12: 12px;
-  --spacing-14: 14px;
   --spacing-16: 16px;
-  --spacing-18: 18px;
-  --spacing-20: 20px;
   --spacing-24: 24px;
   --spacing-32: 32px;
   --spacing-40: 40px;
   --spacing-48: 48px;
-  --spacing-96: 96px;
-  --spacing-144: 144px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-128: 128px;
+  --spacing-160: 160px;
 
   /* Layout */
   --page-max-width: 1200px;
-  --section-gap: 64px;
-  --card-padding: 24px;
-  --element-gap: 12px;
+  --section-gap: 80px;
+  --card-padding: 32px;
+  --element-gap: 8-16px;
 
   /* Border Radius */
   --radius-md: 4px;
   --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 18px;
   --radius-3xl: 24px;
-  --radius-3xl-2: 40px;
-  --radius-full: 57.6px;
-  --radius-full-2: 100px;
-  --radius-full-3: 200px;
-  --radius-full-4: 1000px;
+  --radius-3xl-2: 32px;
+  --radius-3xl-3: 40px;
 
   /* Named Radii */
-  --radius-tags: 100px;
+  --radius-tags: 9999px;
   --radius-cards: 8px;
-  --radius-pills: 100px;
-  --radius-badges: 4px;
-  --radius-buttons: 1000px;
-  --radius-list-items: 24px;
-  --radius-large-cards: 40px;
+  --radius-images: 18px;
+  --radius-nav-pills: 32px;
+  --radius-buttons-lg: 40px;
+  --radius-buttons-sm: 24px;
 
   /* Surfaces */
-  --surface-paper-white: #ffffff;
-  --surface-bone: #e5e6e1;
-  --surface-lavender-mist: #bbb2ce;
-  --surface-pale-sage: #d3e5e9;
-  --surface-dusty-rose: #cb9da2;
+  --surface-canvas: #f0f0eb;
+  --surface-card: #ffffff;
+  --surface-elevated-card: #e1e1db;
+  --surface-dark-surface: #042a2b;
 }
 ```
 
@@ -401,83 +349,69 @@ Never use 0px (sharp corners) — even the smallest badges get 4px. The progress
 ```css
 @theme {
   /* Colors */
-  --color-paper-white: #ffffff;
-  --color-ink-black: #151515;
-  --color-graphite: #23241f;
-  --color-slate-gray: #3a4444;
-  --color-stone-border: #333333;
-  --color-mist-gray: #808080;
-  --color-bone: #e5e6e1;
-  --color-pale-sage: #d3e5e9;
-  --color-lavender-mist: #bbb2ce;
-  --color-dusty-rose: #cb9da2;
-  --color-deep-violet: #453b60;
-  --color-burnt-amber: #65451d;
-  --color-honey-gold: #e4b976;
-  --color-burgundy: #5c2529;
-  --color-blush-border: #d79caa;
+  --color-warm-parchment: #f0f0eb;
+  --color-gallery-white: #ffffff;
+  --color-soft-linen: #e1e1db;
+  --color-mist-gray: #d7d7cf;
+  --color-pale-stone: #cbcbc5;
+  --color-ash-gray: #bfbfb8;
+  --color-graphite-warm: #575753;
+  --color-charcoal-warm: #464643;
+  --color-ink: #111110;
+  --color-signal-orange: #ff3b00;
+  --color-deep-teal: #042a2b;
 
   /* Typography */
-  --font-nng: 'Nng', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-roboto: 'Roboto', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-apercu-pro-mono: 'Apercu pro mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-moderat: 'Moderat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-cranny: 'Cranny', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-abc-diatype: 'ABC Diatype', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-satoshi: 'Satoshi', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-cabinetgrotesk: 'Cabinetgrotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Typography — Scale */
-  --text-micro: 12px;
-  --leading-micro: 1.58;
-  --tracking-micro: 0px;
   --text-caption: 14px;
-  --leading-caption: 1.5;
-  --tracking-caption: -0.01px;
-  --text-body-sm: 16px;
-  --leading-body-sm: 1.45;
-  --tracking-body-sm: -0.13px;
+  --leading-caption: 1.3;
+  --tracking-caption: 0.14px;
   --text-body: 18px;
-  --leading-body: 1.42;
-  --tracking-body: -0.14px;
-  --text-subheading: 22px;
-  --leading-subheading: 1.32;
-  --tracking-subheading: -0.22px;
-  --text-heading-sm: 29px;
-  --leading-heading-sm: 1.3;
-  --tracking-heading-sm: -0.32px;
+  --leading-body: 1.35;
+  --tracking-body: 0.18px;
+  --text-subheading: 24px;
+  --leading-subheading: 1.3;
+  --tracking-subheading: 0.24px;
+  --text-heading-sm: 32px;
+  --leading-heading-sm: 1.2;
+  --tracking-heading-sm: 0.32px;
   --text-heading: 40px;
-  --leading-heading: 1.22;
-  --tracking-heading: -0.48px;
-  --text-heading-lg: 44px;
-  --leading-heading-lg: 1.2;
-  --tracking-heading-lg: -0.92px;
-  --text-display: 69px;
-  --leading-display: 1.1;
-  --tracking-display: -1.45px;
+  --leading-heading: 1.1;
+  --tracking-heading: 0.4px;
+  --text-heading-lg: 61px;
+  --leading-heading-lg: 1;
+  --tracking-heading-lg: -0.43px;
+  --text-display: 80px;
+  --leading-display: 0.95;
+  --tracking-display: -0.56px;
+  --text-display-xl: 96px;
+  --leading-display-xl: 0.91;
+  --tracking-display-xl: -0.67px;
 
   /* Spacing */
-  --spacing-4: 4px;
-  --spacing-5: 5px;
-  --spacing-6: 6px;
   --spacing-8: 8px;
-  --spacing-10: 10px;
-  --spacing-12: 12px;
-  --spacing-14: 14px;
   --spacing-16: 16px;
-  --spacing-18: 18px;
-  --spacing-20: 20px;
   --spacing-24: 24px;
   --spacing-32: 32px;
   --spacing-40: 40px;
   --spacing-48: 48px;
-  --spacing-96: 96px;
-  --spacing-144: 144px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-128: 128px;
+  --spacing-160: 160px;
 
   /* Border Radius */
   --radius-md: 4px;
   --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 18px;
   --radius-3xl: 24px;
-  --radius-3xl-2: 40px;
-  --radius-full: 57.6px;
-  --radius-full-2: 100px;
-  --radius-full-3: 200px;
-  --radius-full-4: 1000px;
+  --radius-3xl-2: 32px;
+  --radius-3xl-3: 40px;
 }
 ```
