@@ -2,79 +2,61 @@
 @import "./variables.css";
 @import "./theme.css";
 
-/* Base document defaults */
 html {
-  font-family: var(--font-nng);
-  background-color: var(--color-paper-white);
-  color: var(--color-ink-black);
+  min-height: 100%;
+  background: var(--color-warm-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-abc-diatype);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  background-color: var(--color-paper-white);
-  color: var(--color-ink-black);
+  background: var(--color-warm-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-abc-diatype);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
-/* Reduced motion accessibility */
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-cranny);
+  font-weight: 400;
+  letter-spacing: -0.007em;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+input, select, textarea {
+  border-color: var(--color-pale-stone);
+  border-radius: 8px;
+  background-color: #fff;
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal-orange);
+  outline-offset: 3px;
+}
+
+/* The product is built from flat planes, warm neutrals and hairline rules. */
+[class*="shadow-"] { box-shadow: none !important; }
+[class*="border-bone"], [class*="border-pale-sage"], [class*="border-stone-border"] { border-color: var(--color-pale-stone); }
+[class*="rounded-xl"], [class*="rounded-2xl"] { border-radius: 8px; }
+
+::selection { background: #ff3b0024; color: var(--color-ink); }
+
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
-
-/* Accessible focus ring */
-:focus-visible {
-  outline: 2px solid var(--color-burnt-amber);
-  outline-offset: 2px;
-}
-
-
-/* Huddle reference system: quiet editorial surfaces and flat hairline structure. */
-:root {
-  --page-max-width: 1200px;
-  --section-gap: 64px;
-  --card-padding: 24px;
-  --element-gap: 12px;
-}
-
-body {
-  font-family: var(--font-nng);
-  font-size: 16px;
-  line-height: 1.45;
-  letter-spacing: -0.008em;
-}
-
-h1, h2, h3, h4 {
-  color: var(--color-ink-black);
-  font-family: var(--font-nng);
-  font-weight: 500;
-}
-
-/* Keep cards flat: no elevation shadows, only 1px hairline borders. */
-[class*="shadow-"] { box-shadow: none !important; }
-
-/* The visual language reserves the fully rounded treatment for primary actions. */
-button:not([aria-label="Close dialog"]) { font-family: var(--font-nng); }
-input, select, textarea {
-  border-color: var(--color-pale-sage);
-  border-radius: 8px;
-  font-family: var(--font-nng);
-}
-
-@media (min-width: 768px) {
-  main { max-width: var(--page-max-width); }
-}
-
-/* Huddle component geometry: cards are 8px, tags/pills 100px, primary CTAs 1000px. */
-.rounded-xl { border-radius: 8px !important; }
-.rounded-2xl { border-radius: 8px !important; }
-.rounded-lg { border-radius: 8px !important; }
-[class*="text-2xl"] { letter-spacing: -0.011em; }
-[class*="text-3xl"], [class*="text-4xl"] { font-weight: 400; letter-spacing: -0.021em; }

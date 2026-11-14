@@ -1,185 +1,104 @@
-import { NavLink } from '../../lib/navigation';
+'use client';
+
+import type { ReactNode } from 'react';
 import {
-  Home, Users, BookOpen, Heart, Menu, FileText, Calendar,
-  ClipboardCheck, BarChart2, UserCog, LogOut, User, GraduationCap
+  Users, BookOpen, Heart, FileText, Calendar,
+  ClipboardCheck, BarChart2, UserRound,
+  X, LayoutDashboard,
 } from 'lucide-react';
+import { NavLink } from '../../lib/navigation';
 import { useAuth } from '../../app/AuthContext';
 import type { Role } from '../../types';
-import { initials } from '../../lib/utils';
-import { api } from '../../lib/api';
 
 interface NavItem {
   label: string;
   to: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 function getNavItems(role: Role): NavItem[] {
+  const profile: NavItem = { label: 'My profile', to: '/profile', icon: <UserRound size={20} strokeWidth={1.7} /> };
+  const dashboard: NavItem = { label: 'Dashboard', to: role === 'guardian' ? '/guardian' : '/staff', icon: <LayoutDashboard size={20} strokeWidth={1.7} /> };
+  let items: NavItem[];
+
   switch (role) {
     case 'guardian':
-      return [
-        { label: 'Home', to: '/guardian', icon: <Home size={18} /> },
-        { label: 'My Profile', to: '/guardian/profile', icon: <User size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'special_educator':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'IEP Goals', to: '/students', icon: <BookOpen size={18} /> },
-        { label: 'Attendance', to: '/students', icon: <Calendar size={18} /> },
-        { label: 'Reviews', to: '/students', icon: <ClipboardCheck size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP goals', to: '/students', icon: <BookOpen size={20} strokeWidth={1.7} /> }, { label: 'Attendance', to: '/students', icon: <Calendar size={20} strokeWidth={1.7} /> }, { label: 'Reviews', to: '/students', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'therapist':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'Therapy', to: '/students', icon: <Heart size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Therapy', to: '/students', icon: <Heart size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'psychiatrist':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'Medical Assessments', to: '/students', icon: <FileText size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Medical assessments', to: '/students', icon: <FileText size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'psychologist':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'Assessments', to: '/students', icon: <FileText size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Assessments', to: '/students', icon: <FileText size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'school_head':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'IEP Reviews', to: '/students', icon: <ClipboardCheck size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP reviews', to: '/students', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     case 'school_admin':
-      return [
-        { label: 'Dashboard', to: '/staff', icon: <Home size={18} /> },
-        { label: 'Students', to: '/students', icon: <Users size={18} /> },
-        { label: 'Users', to: '/staff', icon: <UserCog size={18} /> },
-        { label: 'Reports', to: '/reports', icon: <BarChart2 size={18} /> },
-      ];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      break;
     default:
-      return [];
+      items = [dashboard];
   }
+
+  return [...items, profile];
 }
 
 interface SidebarProps {
   mobile?: boolean;
   onNavigate?: () => void;
+  onClose?: () => void;
 }
 
-export function Sidebar({ mobile = false, onNavigate }: SidebarProps) {
-  const { user, logout } = useAuth();
-
+export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
+  const { user } = useAuth();
   if (!user) return null;
 
   const navItems = getNavItems(user.active_role);
-
   return (
     <aside
-      className={
-        mobile
-          ? 'flex flex-col w-72 max-w-[85vw] bg-white min-h-screen shadow-xl'
-          : 'hidden md:flex flex-col w-16 lg:w-56 bg-white border-r border-stone-border min-h-screen'
-      }
+      className={mobile
+        ? 'flex h-full w-[min(290px,86vw)] flex-col border-r border-ink/15 bg-warm-parchment'
+        : 'hidden h-screen w-[76px] shrink-0 flex-col border-r border-ink/15 bg-warm-parchment md:sticky md:top-0 md:flex'}
       aria-label="Main navigation"
     >
-      {/* Logo area */}
-      <div className="flex items-center gap-2 px-3 py-4 border-b border-stone-border">
-        <div className="w-8 h-8 rounded-lg bg-pale-sage border border-stone-border flex items-center justify-center flex-shrink-0">
-          <GraduationCap size={16} className="text-ink-black" aria-hidden="true" />
-        </div>
-        <span className={mobile ? 'text-sm font-medium text-ink-black tracking-tight' : 'hidden lg:block text-sm font-medium text-ink-black tracking-tight'}>Siddhi</span>
+      <div className="flex h-[72px] items-center justify-center border-b border-ink/15">
+        {mobile ? (
+          <div className="flex w-full items-center justify-between px-5">
+            <span className="font-display text-[26px] leading-none tracking-tight text-ink">Siddhi</span>
+            <button onClick={onClose} className="rounded-full border border-ink/20 p-2 text-graphite hover:bg-soft-linen" aria-label="Close navigation"><X size={18} /></button>
+          </div>
+        ) : (
+          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ink text-[17px] font-semibold tracking-tight text-ink" aria-label="Siddhi">S</span>
+        )}
       </div>
-
-      {/* Nav links */}
-      <nav className="flex-1 py-4 px-2 space-y-1" aria-label="Sidebar navigation">
+      <nav className={mobile ? 'flex flex-1 flex-col gap-2 px-4 py-6' : 'flex flex-1 flex-col items-center gap-3 px-3 py-6'} aria-label="Sidebar navigation">
         {navItems.map((item) => (
           <NavLink
-            key={item.label + item.to}
+            key={`${item.label}-${item.to}`}
             to={item.to}
             onClick={onNavigate}
             title={item.label}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition-colors duration-150
-               ${isActive
-                 ? 'bg-pale-sage text-ink-black font-medium'
-                 : 'text-slate-gray hover:text-ink-black hover:bg-bone'
-               }`
-            }
+            aria-label={item.label}
+            className={({ isActive }) => mobile
+              ? `flex items-center gap-3 rounded-full px-4 py-3 text-sm transition-colors ${isActive ? 'bg-ink text-white' : 'text-graphite hover:bg-soft-linen'}`
+              : `group relative flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${isActive ? 'border-ink bg-ink text-white' : 'border-transparent text-graphite hover:border-pale-stone hover:bg-gallery-white'}`}
           >
-            <span className="flex-shrink-0" aria-hidden="true">{item.icon}</span>
-            <span className={mobile ? 'truncate' : 'hidden lg:block truncate'}>{item.label}</span>
+            {item.icon}
+            {mobile && <span>{item.label}</span>}
+            {!mobile && <span className="pointer-events-none absolute left-[calc(100%+12px)] z-30 hidden whitespace-nowrap rounded-full border border-ink/15 bg-gallery-white px-3 py-1.5 text-xs text-ink group-hover:block">{item.label}</span>}
           </NavLink>
         ))}
       </nav>
-
-      {/* User area + logout */}
-      <div className="p-2 border-t border-bone space-y-1">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div
-            className="w-7 h-7 rounded-full bg-lavender-mist flex items-center justify-center flex-shrink-0 text-xs font-medium text-deep-violet"
-            aria-hidden="true"
-          >
-            {initials(user.full_name)}
-          </div>
-          <div className={mobile ? 'min-w-0 flex-1' : 'hidden lg:block min-w-0 flex-1'}>
-            <p className="text-xs font-medium text-ink-black truncate">{user.full_name}</p>
-            {user.roles.length > 1 ? (
-              <select
-                aria-label="Switch workspace role"
-                value={user.active_role}
-                onChange={async (event) => {
-                  await api.post('/auth/select-role', { role: event.target.value, school_id: user.active_school_id });
-                  window.location.reload();
-                }}
-                className="mt-1 max-w-full text-xs border border-pale-sage rounded-full px-2 py-1 bg-white text-slate-gray"
-              >
-                {user.roles.map((role) => <option key={role} value={role}>{role.replace(/_/g, ' ')}</option>)}
-              </select>
-            ) : (
-              <p className="text-xs text-mist-gray truncate capitalize">{user.active_role.replace(/_/g, ' ')}</p>
-            )}
-          </div>
-        </div>
-        <button
-          onClick={() => logout()}
-          title="Log out"
-          className="flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm text-slate-gray hover:text-ink-black hover:bg-bone transition-colors"
-        >
-          <LogOut size={18} aria-hidden="true" />
-          <span className={mobile ? '' : 'hidden lg:block'}>Log out</span>
-        </button>
+      <div className={mobile ? 'border-t border-ink/15 px-4 py-5 text-xs text-graphite' : 'border-t border-ink/15 py-4 text-center text-[10px] tracking-[0.18em] text-graphite'}>
+        {mobile ? 'SIDDHI · IEP WORKSPACE' : 'IEP'}
       </div>
     </aside>
-  );
-}
-
-/** Mobile top bar with hamburger */
-export function MobileTopBar({ onMenuOpen }: { onMenuOpen: () => void }) {
-  const { user } = useAuth();
-  return (
-    <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-stone-border">
-      <button
-        onClick={onMenuOpen}
-        aria-label="Open navigation menu"
-        className="p-1 rounded text-slate-gray hover:text-ink-black"
-      >
-        <Menu size={20} />
-      </button>
-      <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-lavender-mist flex items-center justify-center text-xs font-medium text-deep-violet">
-          {user ? initials(user.full_name) : '?'}
-        </div>
-      </div>
-    </header>
   );
 }

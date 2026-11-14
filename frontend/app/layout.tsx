@@ -1,4 +1,5 @@
 import '@fontsource-variable/inter';
+import '@fontsource-variable/fraunces';
 import '../src/styles/index.css';
 
 export const metadata = {

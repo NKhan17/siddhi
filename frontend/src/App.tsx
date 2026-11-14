@@ -5,11 +5,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './app/AuthContext';
 import { ProtectedRoute } from './app/ProtectedRoute';
+import { PageShell } from './components/layout/PageShell';
 import LoginPage from './features/auth/LoginPage';
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
 import ResetPasswordPage from './features/auth/ResetPasswordPage';
 import GuardianDashboard from './features/guardian/GuardianDashboard';
-import GuardianProfilePage from './features/guardian/GuardianProfilePage';
+import ProfilePage from './features/profile/ProfilePage';
 import StaffDashboard from './features/students/StaffDashboard';
 import StudentsListPage from './features/students/StudentsListPage';
 import StudentProfilePage from './features/students/StudentProfilePage';
@@ -48,7 +49,7 @@ function RouteContent() {
   if (pathname === '/reset-password') return <ResetPasswordPage />;
   if (!user) return null;
   if (pathname === '/guardian') return <ProtectedRoute allowedRoles={['guardian']}><GuardianDashboard /></ProtectedRoute>;
-  if (pathname === '/guardian/profile') return <ProtectedRoute allowedRoles={['guardian']}><GuardianProfilePage /></ProtectedRoute>;
+  if (pathname === '/profile' || pathname === '/guardian/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
   if (pathname === '/staff') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StaffDashboard /></ProtectedRoute>;
   if (pathname === '/students') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StudentsListPage /></ProtectedRoute>;
   if (studentId && !section) return <ProtectedRoute><StudentProfilePage /></ProtectedRoute>;
@@ -63,7 +64,7 @@ function RouteContent() {
   if (studentId && section === 'attendance') return <ProtectedRoute><AttendancePage /></ProtectedRoute>;
   if (studentId && section === 'reviews') return <ProtectedRoute><ReviewsPage /></ProtectedRoute>;
   if (pathname === '/reports') return <ProtectedRoute><ReportsPage /></ProtectedRoute>;
-  return <div className="min-h-screen p-12"><h1 className="text-heading-sm">Page not found</h1><button className="underline mt-4" onClick={() => router.push(user.landing_route)}>Return to dashboard</button></div>;
+  return <PageShell><div className="py-12"><h1 className="font-display text-4xl">Page not found</h1><button className="mt-4 rounded-full border border-ink px-5 py-2 text-sm hover:bg-gallery-white" onClick={() => router.push(user.landing_route)}>Return to dashboard</button></div></PageShell>;
 }
 
 export default function App() {
