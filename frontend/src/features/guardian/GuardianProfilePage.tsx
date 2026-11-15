@@ -55,8 +55,8 @@ export default function GuardianProfilePage() {
                       <p className="truncate text-sm font-medium text-ink">{child.full_name}</p>
                       <p className="mt-1 truncate text-xs text-graphite">{child.grade_class} <span className="px-1 text-muted-text">·</span> {ageFromDob(child.date_of_birth)} years <span className="px-1 text-muted-text">·</span> {child.relationship_label || 'Guardian'}</p>
                     </div>
-                    <span className="hidden items-center gap-2 text-xs text-graphite sm:flex">View profile <ChevronRight size={15} className="transition-transform group-hover:translate-x-1" /></span>
-                    <ChevronRight size={18} className="text-graphite sm:hidden" />
+                    <span className="hidden min-h-11 min-w-[10.5rem] shrink-0 items-center justify-center gap-3 rounded-full bg-ink px-6 py-3 text-xs font-medium text-white transition-colors group-hover:bg-graphite sm:inline-flex [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0">View profile <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" /></span>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-white sm:hidden"><ChevronRight size={18} className="shrink-0" /></span>
                   </button>
                 ))}
               </div>
