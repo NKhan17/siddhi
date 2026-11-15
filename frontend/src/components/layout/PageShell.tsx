@@ -26,7 +26,6 @@ export function PageShell({ children }: PageShellProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const lastPathname = useRef(pathname);
-  const historyBackPending = useRef(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const pageTitle = sectionNames.find(([pattern]) => pattern.test(pathname))?.[1] ?? 'Workspace';
 
@@ -34,7 +33,7 @@ export function PageShell({ children }: PageShellProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (lastPathname.current !== pathname) {
-      const isHistoryBack = historyBackPending.current;
+      const isHistoryBack = document.documentElement.dataset.navigationDirection === 'back';
       if (isHistoryBack && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const page = document.querySelector<HTMLElement>('.workspace-page');
         page?.animate(
@@ -42,50 +41,17 @@ export function PageShell({ children }: PageShellProps) {
           { duration: 220, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
         );
       }
-      historyBackPending.current = false;
       if (document.documentElement.dataset.navigationDirection === 'back') delete document.documentElement.dataset.navigationDirection;
       lastPathname.current = pathname;
     }
   }, [pathname]);
 
   // Let the browser own edge-swipe gestures. If it doesn't supply a visual transition,
-  // animate the newly revealed route once the history traversal has committed.
+  // animate the newly revealed route after the history traversal commits.
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
-      historyBackPending.current = !hasBrowserTransition && window.location.pathname !== lastPathname.current;
-      if (!historyBackPending.current) return;
-
-      const root = document.documentElement;
-      root.dataset.navigationDirection = 'back';
-      const viewDocument = document as Document & {
-        startViewTransition?: (update: () => void | Promise<void>) => { finished: Promise<void> };
-      };
-      if (viewDocument.startViewTransition) {
-        const previousContent = document.querySelector('.workspace-page')?.textContent ?? '';
-        try {
-          const transition = viewDocument.startViewTransition(() => new Promise<void>((resolve) => {
-            const finish = () => {
-              observer.disconnect();
-              window.clearTimeout(timeout);
-              resolve();
-            };
-            const observer = new MutationObserver(() => {
-              const nextContent = document.querySelector('.workspace-page')?.textContent ?? '';
-              if (window.location.pathname !== lastPathname.current && nextContent !== previousContent) finish();
-            });
-            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-            const timeout = window.setTimeout(finish, 1200);
-          }));
-          historyBackPending.current = false;
-          const clearDirection = () => {
-            if (root.dataset.navigationDirection === 'back') delete root.dataset.navigationDirection;
-          };
-          void transition.finished.then(clearDirection, clearDirection);
-        } catch {
-          // Keep the post-commit animation fallback below if the browser rejects a transition.
-        }
-      }
+      if (!hasBrowserTransition) document.documentElement.dataset.navigationDirection = 'back';
     };
     window.addEventListener('popstate', handlePopState, true);
     return () => window.removeEventListener('popstate', handlePopState, true);
