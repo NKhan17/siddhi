@@ -34,7 +34,8 @@ export function PageShell({ children }: PageShellProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (lastPathname.current !== pathname) {
-      if (historyBackPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const isHistoryBack = historyBackPending.current || document.documentElement.dataset.navigationDirection === 'back';
+      if (isHistoryBack && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const page = document.querySelector<HTMLElement>('.workspace-page');
         page?.animate(
           [{ opacity: 0.82, transform: 'translateX(-18px)' }, { opacity: 1, transform: 'translateX(0)' }],
@@ -42,6 +43,7 @@ export function PageShell({ children }: PageShellProps) {
         );
       }
       historyBackPending.current = false;
+      if (document.documentElement.dataset.navigationDirection === 'back') delete document.documentElement.dataset.navigationDirection;
       lastPathname.current = pathname;
     }
   }, [pathname]);
@@ -52,6 +54,7 @@ export function PageShell({ children }: PageShellProps) {
     const handlePopState = (event: PopStateEvent) => {
       const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
       historyBackPending.current = !hasBrowserTransition && window.location.pathname !== lastPathname.current;
+      if (historyBackPending.current) document.documentElement.dataset.navigationDirection = 'back';
     };
     window.addEventListener('popstate', handlePopState, true);
     return () => window.removeEventListener('popstate', handlePopState, true);

@@ -62,6 +62,11 @@ input, select, textarea {
 }
 
 
+/* Enable browser-managed transitions for same-origin full-document navigations too. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+
 /* Keep the app chrome stationary while the workspace content transitions. */
 .workspace-header { view-transition-name: workspace-header; }
 .workspace-sidebar { view-transition-name: workspace-sidebar; }
