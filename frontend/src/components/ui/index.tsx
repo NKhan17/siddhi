@@ -58,8 +58,8 @@ export function Button({
       disabled={disabled || loading}
       {...props}
     >
-      {loading && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
-      {children}
+      {loading && <Loader2 size={14} className="shrink-0 animate-spin" aria-hidden="true" />}
+      <span className="inline-flex min-w-0 max-w-full items-center justify-center gap-2 break-words [&>svg]:shrink-0">{children}</span>
     </button>
   );
 }
