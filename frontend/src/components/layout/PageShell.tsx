@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Menu, LogOut, ChevronDown, ArrowLeft, Download } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../app/AuthContext';
@@ -9,6 +9,7 @@ import { Sidebar } from './Sidebar';
 import { initials } from '../../lib/utils';
 
 interface PageShellProps { children: React.ReactNode }
+const PageShellContext = createContext(false);
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
 
 const sectionNames: Array<[RegExp, string]> = [
@@ -20,6 +21,12 @@ const sectionNames: Array<[RegExp, string]> = [
 ];
 
 export function PageShell({ children }: PageShellProps) {
+  const nested = useContext(PageShellContext);
+  if (nested) return <>{children}</>;
+  return <PageShellLayout>{children}</PageShellLayout>;
+}
+
+function PageShellLayout({ children }: PageShellProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -74,6 +81,7 @@ export function PageShell({ children }: PageShellProps) {
   };
 
   return (
+    <PageShellContext.Provider value={true}>
     <div className="flex min-h-screen bg-warm-parchment text-ink">
       <Sidebar />
       {mobileOpen && (
@@ -137,5 +145,6 @@ export function PageShell({ children }: PageShellProps) {
         </main>
       </div>
     </div>
+    </PageShellContext.Provider>
   );
 }

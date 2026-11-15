@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '../../lib/navigation';
 import { api } from '../../lib/api';
 import type { GuardianProfile } from '../../types';
-import { PageShell } from '../../components/layout/PageShell';
 import { LoadingState, ErrorState, Avatar, EmptyState } from '../../components/ui';
 import { Mail, Phone, ChevronRight } from 'lucide-react';
 import { ageFromDob } from '../../lib/utils';
@@ -17,7 +16,7 @@ export default function GuardianProfilePage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="space-y-8">
         <section className="rounded-lg border border-ink/80 bg-gallery-white p-6 sm:p-9 lg:p-10">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-charcoal-warm">Account</p>
@@ -65,6 +64,6 @@ export default function GuardianProfilePage() {
           </section>
         )}
       </div>
-    </PageShell>
+    </>
   );
 }

@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '../../lib/navigation';
 import { api } from '../../lib/api';
 import type { GuardianChildCard } from '../../types';
-import { PageShell } from '../../components/layout/PageShell';
 import { LoadingState, ErrorState, EmptyState, Avatar, StatusBadge } from '../../components/ui';
 import { ageFromDob } from '../../lib/utils';
 import { ArrowUpRight, ChevronRight, GraduationCap, Heart, ShieldCheck } from 'lucide-react';
@@ -84,7 +83,7 @@ export default function GuardianDashboard() {
   });
 
   return (
-    <PageShell>
+    <>
       <section className="mb-8 flex flex-col gap-3 sm:mb-10">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-charcoal-warm">Family workspace</p>
         <h1 className="font-display text-[42px] leading-[1.02] text-ink sm:text-[54px]">Your child{children && children.length > 1 ? 'ren' : ''}</h1>
@@ -104,6 +103,6 @@ export default function GuardianDashboard() {
           )}
         </>
       )}
-    </PageShell>
+    </>
   );
 }

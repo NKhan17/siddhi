@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './app/AuthContext';
 import { ProtectedRoute } from './app/ProtectedRoute';
-import { PageShell } from './components/layout/PageShell';
 import LoginPage from './features/auth/LoginPage';
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
 import ResetPasswordPage from './features/auth/ResetPasswordPage';
@@ -27,6 +26,7 @@ import AllAttendancePage from './features/attendance/AllAttendancePage';
 import ReviewsPage from './features/reviews/ReviewsPage';
 import AllReviewsPage from './features/reviews/AllReviewsPage';
 import ReportsPage from './features/reports/ReportsPage';
+import { PageShell } from './components/layout/PageShell';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
 
@@ -68,9 +68,17 @@ function RouteContent() {
   if (studentId && section === 'attendance') return <ProtectedRoute><AttendancePage /></ProtectedRoute>;
   if (studentId && section === 'reviews') return <ProtectedRoute><ReviewsPage /></ProtectedRoute>;
   if (pathname === '/reports') return <ProtectedRoute><ReportsPage /></ProtectedRoute>;
-  return <PageShell><div className="py-12"><h1 className="font-display text-4xl">Page not found</h1><button className="mt-4 rounded-full border border-ink px-5 py-2 text-sm hover:bg-gallery-white" onClick={() => router.push(user.landing_route)}>Return to dashboard</button></div></PageShell>;
+  return <div className="py-12"><h1 className="font-display text-4xl">Page not found</h1><button className="mt-4 rounded-full border border-ink px-5 py-2 text-sm hover:bg-gallery-white" onClick={() => router.push(user.landing_route)}>Return to dashboard</button></div>;
+}
+
+function AppFrame() {
+  const { user, isLoading } = useAuth();
+  const pathname = usePathname();
+  const isPublicRoute = ['/login', '/forgot-password', '/reset-password'].includes(pathname);
+  if (isLoading || !user || isPublicRoute) return <RouteContent />;
+  return <PageShell><RouteContent /></PageShell>;
 }
 
 export default function App() {
-  return <QueryClientProvider client={queryClient}><AuthProvider><Suspense fallback={<div className="min-h-screen" />}><RouteContent /></Suspense></AuthProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><AuthProvider><Suspense fallback={<div className="min-h-screen" />}><AppFrame /></Suspense></AuthProvider></QueryClientProvider>;
 }
