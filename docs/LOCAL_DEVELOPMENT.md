@@ -19,23 +19,16 @@ npm run dev
 
 Open `http://localhost:3000/login`.
 
-## Demo accounts
+## Demo accounts and seeded student profiles
 
-These synthetic accounts are created by `backend/app/seed_demo.py`. Staff sign in with faculty IDs; guardians sign in with email addresses.
+The demo seed creates the same nine login accounts and five student records documented in the repository [README](../README.md#demo-accounts-and-seed-data-synthetic-local-development-only). Refer to that table for the exact names, faculty IDs/email usernames, phone numbers, linked children, admission numbers, and passwords.
 
-| Account | Login identifier | Password |
-|---|---|---|
-| School administrator | `FAC-ADMIN-001` | `SiddhiAdmin2026!` |
-| Principal / school head | `FAC-HEAD-001` | `SiddhiHead2026!` |
-| Special educator 1 | `FAC-EDU-001` | `SiddhiEducator2026!` |
-| Special educator 2 | `FAC-EDU-002` | `SiddhiEducator2026!` |
-| Therapist | `FAC-THER-001` | `SiddhiTherapy2026!` |
-| Psychologist | `FAC-PSY-001` | `SiddhiPsych2026!` |
-| Psychiatrist | `FAC-PSYCH-001` | `SiddhiPsychiatrist2026!` |
-| Guardian (one child) | `guardian.single@siddhi.test` | `SiddhiGuardian2026!` |
-| Guardian (two children) | `guardian.multi@siddhi.test` | `SiddhiGuardian2026!` |
+- Staff choose **School Staff** and sign in with their faculty ID.
+- Guardians choose **Guardian** and sign in with their email address.
+- Students are seeded profile records, not login accounts; no student username/password is supported by the current role model.
+- Re-running the seed on an existing `SJA-001` database is intended to restore the reserved demo credentials and ensure the five student profiles, guardian links, and staff assignments exist.
 
-The seed contains student profiles but does not create student accounts. Students are not an authenticated role in the supplied implementation plan.
+Use synthetic credentials only against a local/test database. Do not run the seed against production.
 
 ## Health check
 

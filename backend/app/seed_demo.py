@@ -15,49 +15,78 @@ from app.models.entities import (
 def seed_database():
     db: Session = SessionLocal()
     try:
-        # Check if already seeded
         school = db.query(School).filter(School.code == "SJA-001").first()
         if school:
-            faculty_ids = {
-                "admin@siddhi.test": "FAC-ADMIN-001",
-                "principal@siddhi.test": "FAC-HEAD-001",
-                "educator1@siddhi.test": "FAC-EDU-001",
-                "educator2@siddhi.test": "FAC-EDU-002",
-                "therapist@siddhi.test": "FAC-THER-001",
-                "psychologist@siddhi.test": "FAC-PSY-001",
-                "psychiatrist@siddhi.test": "FAC-PSYCH-001",
-            }
-            updated = 0
-            for email, faculty_id in faculty_ids.items():
+            school.is_active = True
+            accounts = [
+                ("admin@siddhi.test", "Sanjay Deshmukh (Admin)", "SiddhiAdmin2026!", "555-0101", "FAC-ADMIN-001", "school_admin"),
+                ("principal@siddhi.test", "Dr. Shalini Menon (School Head)", "SiddhiHead2026!", "555-0102", "FAC-HEAD-001", "school_head"),
+                ("educator1@siddhi.test", "Ananya Sharma (Special Educator)", "SiddhiEducator2026!", "555-0103", "FAC-EDU-001", "special_educator"),
+                ("educator2@siddhi.test", "Rajesh Kumar (Special Educator)", "SiddhiEducator2026!", "555-0104", "FAC-EDU-002", "special_educator"),
+                ("therapist@siddhi.test", "Priya Nair (Lead Therapist)", "SiddhiTherapy2026!", "555-0105", "FAC-THER-001", "therapist"),
+                ("psychologist@siddhi.test", "Dr. Arjun Verma (Psychologist)", "SiddhiPsych2026!", "555-0106", "FAC-PSY-001", "psychologist"),
+                ("psychiatrist@siddhi.test", "Dr. Kavita Rao (Psychiatrist)", "SiddhiPsychiatrist2026!", "555-0109", "FAC-PSYCH-001", "psychiatrist"),
+                ("guardian.single@siddhi.test", "Sunita Patel", "SiddhiGuardian2026!", "555-0107", None, "guardian"),
+                ("guardian.multi@siddhi.test", "Meera Iyer", "SiddhiGuardian2026!", "555-0108", None, "guardian"),
+            ]
+            users = {}
+            for email, name, password, phone, faculty_id, role in accounts:
                 user = db.query(User).filter(User.email == email).first()
-                if user and user.faculty_id != faculty_id:
-                    user.faculty_id = faculty_id
-                    updated += 1
-            if updated:
-                db.commit()
-            psychiatrist = db.query(User).filter(User.email == "psychiatrist@siddhi.test").first()
-            if not psychiatrist:
-                psychiatrist = User(
-                    id=uuid.uuid4(), faculty_id="FAC-PSYCH-001", email="psychiatrist@siddhi.test",
-                    password_hash=get_password_hash("SiddhiPsychiatrist2026!"),
-                    full_name="Dr. Kavita Rao (Psychiatrist)", phone="555-0109", is_active=True
-                )
-                db.add(psychiatrist)
-                db.commit()
-            membership = db.query(SchoolMembership).filter(
-                SchoolMembership.school_id == school.id, SchoolMembership.user_id == psychiatrist.id,
-                SchoolMembership.role == "psychiatrist"
-            ).first()
-            if not membership:
-                db.add(SchoolMembership(school_id=school.id, user_id=psychiatrist.id, role="psychiatrist", is_active=True))
-                db.commit()
-            sample_student = db.query(Student).filter(Student.school_id == school.id, Student.admission_number == "ADM-2026-001").first()
-            if sample_student:
-                assignment = db.query(StaffStudentAssignment).filter(StaffStudentAssignment.staff_user_id == psychiatrist.id, StaffStudentAssignment.student_id == sample_student.id, StaffStudentAssignment.school_id == school.id).first()
+                if not user:
+                    user = User(id=uuid.uuid4(), email=email)
+                    db.add(user)
+                user.full_name, user.password_hash, user.phone = name, get_password_hash(password), phone
+                user.faculty_id, user.is_active = faculty_id, True
+                db.flush()
+                users[email] = user
+                membership = db.query(SchoolMembership).filter_by(school_id=school.id, user_id=user.id, role=role).first()
+                if not membership:
+                    db.add(SchoolMembership(school_id=school.id, user_id=user.id, role=role, is_active=True))
+                else:
+                    membership.is_active = True
+
+            student_specs = [
+                ("ADM-2026-001", "Aarav Patel", date(2017,4,15), "Male", "Autism Spectrum Disorder", date(2023,6,12), "Grade 3-B", "Mild to moderate autism spectrum disorder with sensory sensitivity", "Exceptional visual pattern recognition, highly focused on digital tools, gentle temperament", "Expressive verbal communication, social peer interaction, sensory processing in loud areas", "Visual and kinesthetic with structured visual timetable", "English, Hindi, Gujarati", "Noise-cancelling headphones, AAC communication tablet"),
+                ("ADM-2026-002", "Diya Iyer", date(2015,8,22), "Female", "Specific Learning Disability", date(2022,6,10), "Grade 5-A", "Dyslexia with phonological processing deficit", "Creative storytelling, strong conceptual comprehension, enthusiastic in art and drama", "Reading fluency, decoding unfamiliar multi-syllabic words, spelling accuracy", "Multisensory Orton-Gillingham approach, audio-supported reading", "English, Tamil", "Speech-to-text software, coloured reading overlays"),
+                ("ADM-2026-003", "Vivaan Iyer", date(2018,11,5), "Male", "ADHD with Speech Delay", date(2024,6,15), "Grade 2-C", "ADHD combined presentation with articulation delay", "High energy, curious, friendly, excels in physical activities and mathematics", "Sustained attention during seated desk work, articulation of consonant blends", "Frequent movement breaks, tactile learning aids, short task increments", "English, Tamil, Hindi", "Wobble stool, timer visual cue"),
+                ("ADM-2026-004", "Rohan Sen", date(2016,1,19), "Male", "Locomotor Disability (Cerebral Palsy)", date(2023,6,12), "Grade 4-A", "Spastic diplegia cerebral palsy", "Analytical reasoning, strong auditory memory, active participant in class discussions", "Fine motor grip for sustained writing, physical mobility between floors", "Auditory and oral responses, computer-assisted typing", "English, Bengali", "Walker, adapted pencil grip, accessible keyboard"),
+                ("ADM-2026-005", "Maya Rao", date(2014,5,30), "Female", "Intellectual Disability (Mild)", date(2021,6,14), "Grade 6-B", "Mild intellectual disability with adaptive functioning needs", "Eager to help, cooperative, diligent, enjoys functional life skills activities", "Abstract mathematical concepts, independent self-management of complex routines", "Step-by-step task analysis, visual checklists, repeated practical practice", "English, Kannada", "Visual schedule watch, calculator"),
+            ]
+            students = {}
+            for spec in student_specs:
+                (admission, name, dob, gender, category, enrolled, grade, diagnosis,
+                 strengths, needs, learning_style, languages, devices) = spec
+                student = db.query(Student).filter_by(school_id=school.id, admission_number=admission).first()
+                if not student:
+                    student = Student(id=uuid.uuid4(), school_id=school.id, admission_number=admission, full_name=name, date_of_birth=dob, gender=gender, disability_category=category, enrollment_date=enrolled, grade_class=grade)
+                    db.add(student)
+                student.full_name, student.date_of_birth, student.gender = name, dob, gender
+                student.disability_category, student.enrollment_date, student.grade_class = category, enrolled, grade
+                student.diagnosis, student.strengths, student.areas_of_need = diagnosis, strengths, needs
+                student.learning_style, student.languages_known, student.assistive_devices = learning_style, languages, devices
+                student.is_active = True
+                db.flush()
+                students[admission] = student
+
+            links = [("guardian.single@siddhi.test", "ADM-2026-001"), ("guardian.multi@siddhi.test", "ADM-2026-002"), ("guardian.multi@siddhi.test", "ADM-2026-003")]
+            for email, admission in links:
+                guardian, student = users[email], students[admission]
+                link = db.query(GuardianStudentLink).filter_by(guardian_user_id=guardian.id, student_id=student.id).first()
+                if not link:
+                    db.add(GuardianStudentLink(school_id=school.id, guardian_user_id=guardian.id, student_id=student.id, relationship_label="Mother", is_primary=True, is_active=True))
+                else:
+                    link.is_active, link.relationship_label = True, "Mother"
+
+            assignments = [("educator1@siddhi.test","ADM-2026-001","special_educator"),("therapist@siddhi.test","ADM-2026-001","speech_therapist"),("psychologist@siddhi.test","ADM-2026-001","psychologist"),("psychiatrist@siddhi.test","ADM-2026-001","psychiatrist"),("educator1@siddhi.test","ADM-2026-002","special_educator"),("educator2@siddhi.test","ADM-2026-003","special_educator"),("therapist@siddhi.test","ADM-2026-003","speech_therapist"),("educator2@siddhi.test","ADM-2026-004","special_educator"),("educator2@siddhi.test","ADM-2026-005","special_educator")]
+            for email, admission, kind in assignments:
+                staff, student = users[email], students[admission]
+                assignment = db.query(StaffStudentAssignment).filter_by(school_id=school.id, staff_user_id=staff.id, student_id=student.id, assignment_type=kind).first()
                 if not assignment:
-                    db.add(StaffStudentAssignment(school_id=school.id, staff_user_id=psychiatrist.id, student_id=sample_student.id, assignment_type="psychiatrist", is_active=True))
-                    db.commit()
-            print(f"Database already contains demo school SJA-001. Seed skipped; faculty IDs updated: {updated}; psychiatrist account ensured.")
+                    db.add(StaffStudentAssignment(school_id=school.id, staff_user_id=staff.id, student_id=student.id, assignment_type=kind, is_active=True))
+                else:
+                    assignment.is_active = True
+            db.commit()
+            print("Demo seed refreshed: 9 login accounts, 5 student profiles, guardian links and staff assignments.")
             return
 
         print("Seeding synthetic demo records into PostgreSQL...")

@@ -8,7 +8,7 @@ Siddhi is an Individualized Education Program (IEP) tracking platform for school
 - Next.js server handlers connect directly to PostgreSQL using `pg`; authentication uses Argon2 password hashes, signed access JWTs, rotating refresh tokens, and HttpOnly cookies.
 - Role and student access checks are enforced in the server layer. Guardian visibility and staff assignment rules are applied to student data.
 - Excel exports are generated in the Next.js server using ExcelJS.
-- The former FastAPI endpoint files remain as migration/reference material and are not used by the deployed Next.js application. Python/Alembic remains the one-time schema migration and synthetic data provisioning toolchain.
+- The former FastAPI endpoint files remain as migration/reference material and are not used by the deployed Next.js application. Python/Alembic remains the schema migration and synthetic data provisioning toolchain.
 
 ## Repository map
 
@@ -45,28 +45,60 @@ npm run dev
 
 Open `http://localhost:3000/login`. There is no FastAPI server to start; Next.js serves the views and API routes together.
 
-## Demo accounts (synthetic; local development only)
+## Demo accounts and seed data (synthetic; local development only)
 
-Staff log in using their faculty ID. Guardians log in using their email address.
+The demo seed provisions one school, nine login accounts, five student profiles, guardian links, staff assignments, and sample IEP/therapy/assessment/progress records. Run it after applying migrations:
 
-| Faculty ID | Role | Password |
-|---|---|---|
-| `FAC-ADMIN-001` | School administrator | `SiddhiAdmin2026!` |
-| `FAC-HEAD-001` | Principal / school head | `SiddhiHead2026!` |
-| `FAC-EDU-001` | Special educator | `SiddhiEducator2026!` |
-| `FAC-EDU-002` | Special educator | `SiddhiEducator2026!` |
-| `FAC-THER-001` | Therapist | `SiddhiTherapy2026!` |
-| `FAC-PSY-001` | Psychologist | `SiddhiPsych2026!` |
-| `FAC-PSYCH-001` | Psychiatrist | `SiddhiPsychiatrist2026!` |
+```bash
+python -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt
+cd backend
+../.venv/bin/alembic upgrade head
+../.venv/bin/python -m app.seed_demo
+```
 
-| Guardian email | Password |
-|---|---|
-| `guardian.single@siddhi.test` | `SiddhiGuardian2026!` |
-| `guardian.multi@siddhi.test` | `SiddhiGuardian2026!` |
+Open `http://localhost:3000/login`. Staff select **School Staff** and sign in with the faculty ID; guardians select **Guardian** and sign in with their email address. All passwords below are synthetic local-development credentials.
 
-The demo seed includes student records, not student login accounts. The implementation plan defines guardian and school staff workspaces; it does not define a student login role or student credentials. Do not use these synthetic accounts on the production site.
+### School staff accounts
 
-If the demo school already exists, rerunning the seed ensures the psychiatrist demo account, membership, and sample student assignment exist without duplicating the rest of the data.
+| Name | Role | Faculty ID (username) | Email | Phone | Password |
+|---|---|---|---|---|---|
+| Sanjay Deshmukh (Admin) | School administrator | `FAC-ADMIN-001` | `admin@siddhi.test` | `555-0101` | `SiddhiAdmin2026!` |
+| Dr. Shalini Menon | School head | `FAC-HEAD-001` | `principal@siddhi.test` | `555-0102` | `SiddhiHead2026!` |
+| Ananya Sharma | Special educator | `FAC-EDU-001` | `educator1@siddhi.test` | `555-0103` | `SiddhiEducator2026!` |
+| Rajesh Kumar | Special educator | `FAC-EDU-002` | `educator2@siddhi.test` | `555-0104` | `SiddhiEducator2026!` |
+| Priya Nair | Therapist | `FAC-THER-001` | `therapist@siddhi.test` | `555-0105` | `SiddhiTherapy2026!` |
+| Dr. Arjun Verma | Psychologist | `FAC-PSY-001` | `psychologist@siddhi.test` | `555-0106` | `SiddhiPsych2026!` |
+| Dr. Kavita Rao | Psychiatrist | `FAC-PSYCH-001` | `psychiatrist@siddhi.test` | `555-0109` | `SiddhiPsychiatrist2026!` |
+
+### Guardian accounts
+
+| Name | Login email (username) | Phone | Linked child/children | Password |
+|---|---|---|---|---|
+| Sunita Patel | `guardian.single@siddhi.test` | `555-0107` | Aarav Patel (one child) | `SiddhiGuardian2026!` |
+| Meera Iyer | `guardian.multi@siddhi.test` | `555-0108` | Diya Iyer and Vivaan Iyer (two children) | `SiddhiGuardian2026!` |
+
+### Seeded student profiles
+
+These five student records are created by the seed and can be opened from staff dashboards or their linked guardian accounts. **Students do not have login usernames or passwords**: the current application defines staff and guardian authentication, not a student login role.
+
+| Student | Admission number | Date of birth | Grade / class | Disability category | Linked guardian |
+|---|---|---|---|---|---|
+| Aarav Patel | `ADM-2026-001` | 15 Apr 2017 | Grade 3-B | Autism Spectrum Disorder | Sunita Patel |
+| Diya Iyer | `ADM-2026-002` | 22 Aug 2015 | Grade 5-A | Specific Learning Disability | Meera Iyer |
+| Vivaan Iyer | `ADM-2026-003` | 5 Nov 2018 | Grade 2-C | ADHD with Speech Delay | Meera Iyer |
+| Rohan Sen | `ADM-2026-004` | 19 Jan 2016 | Grade 4-A | Locomotor Disability (Cerebral Palsy) | No guardian account linked |
+| Maya Rao | `ADM-2026-005` | 30 May 2014 | Grade 6-B | Intellectual Disability (Mild) | No guardian account linked |
+
+### Demo school and test coverage
+
+- **School:** St. Jude Inclusive Academy (`SJA-001`), 12 Garden Valley Road, Knowledge Hub
+- **Single-child guardian layout:** sign in as `guardian.single@siddhi.test`.
+- **Multi-child guardian layout:** sign in as `guardian.multi@siddhi.test`.
+- **Staff dashboards and role-specific views:** use the corresponding staff account above.
+- **Student detail and IEP sections:** open any student assigned to the signed-in staff member or linked to the guardian.
+
+The accounts and records are synthetic. Never use these credentials on the production site. Running the seed is intended for a local/test database only; it resets the passwords of these reserved `.test` demo users to the values documented above.
 
 ## API and health
 
