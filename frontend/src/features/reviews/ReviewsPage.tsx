@@ -43,7 +43,7 @@ function ApprovalRow({
       <div>
         <p className="text-xs font-medium text-ink-black capitalize">{approval.required_role.replace(/_/g, ' ')}</p>
         {approval.approver_name && approval.status !== 'pending' && (
-          <p className="text-xs text-mist-gray">{approval.approver_name}</p>
+          <p className="text-xs text-muted-text">{approval.approver_name}</p>
         )}
         {approval.comment && <p className="text-xs text-slate-gray italic mt-0.5">"{approval.comment}"</p>}
       </div>
@@ -139,12 +139,12 @@ export default function ReviewsPage() {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-burnt-amber uppercase">
+                    <span className="text-xs font-medium text-charcoal-warm uppercase">
                       {r.review_type.replace(/_/g, ' ')} Review
                     </span>
                     <StatusBadge status={r.status} />
                   </div>
-                  <p className="text-xs text-mist-gray">
+                  <p className="text-xs text-muted-text">
                     Scheduled: {formatDate(r.scheduled_date)}
                     {r.conducted_at && ` · Conducted: ${formatDate(r.conducted_at)}`}
                   </p>
@@ -153,7 +153,7 @@ export default function ReviewsPage() {
                   onClick={() => setExpandedId(prev => prev === r.id ? null : r.id)}
                   aria-expanded={expandedId === r.id}
                   aria-label="Toggle approval details"
-                  className="text-mist-gray hover:text-ink-black"
+                  className="text-muted-text hover:text-ink-black"
                 >
                   {expandedId === r.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
@@ -165,7 +165,7 @@ export default function ReviewsPage() {
 
               {expandedId === r.id && r.approvals.length > 0 && (
                 <div className="mt-2 border-t border-bone pt-2">
-                  <p className="text-xs font-medium text-mist-gray mb-2">Approvals</p>
+                  <p className="text-xs font-medium text-muted-text mb-2">Approvals</p>
                   {r.approvals.map(a => (
                     <ApprovalRow
                       key={a.id}
@@ -214,7 +214,7 @@ export default function ReviewsPage() {
             <Field label="Review Notes" htmlFor="review_notes">
               <Textarea id="review_notes" rows={2} {...reviewForm.register('review_notes')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
 
@@ -238,7 +238,7 @@ export default function ReviewsPage() {
             <Field label="Comment (optional)" htmlFor="comment">
               <Textarea id="comment" rows={2} {...decisionForm.register('comment')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

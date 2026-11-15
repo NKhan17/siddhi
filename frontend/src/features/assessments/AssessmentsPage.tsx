@@ -13,7 +13,7 @@ import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select
 } from '../../components/ui';
-import { formatDate } from '../../lib/utils';
+import { formatDate, todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   assessment_type: z.string().min(1),
@@ -24,7 +24,7 @@ const schema = z.object({
   recommendations: z.string().optional(),
   guardian_visible: z.boolean(),
   next_review_date: z.string().optional(),
-});
+}).refine(values => !values.next_review_date || values.next_review_date >= values.assessment_date, { path: ['next_review_date'], message: 'Next review date cannot be before the assessment date' });
 type FormValues = z.infer<typeof schema>;
 
 const TYPES = ['psychological', 'educational', 'medical', 'observation', 'functional', 'other'];
@@ -36,6 +36,7 @@ export default function AssessmentsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const today = todayISODate();
   const canWrite = user?.active_role && ['psychologist', 'psychiatrist', 'special_educator', 'therapist', 'school_head'].includes(user.active_role);
 
   const { data, isLoading, error } = useQuery<AssessmentRecord[]>({
@@ -44,7 +45,7 @@ export default function AssessmentsPage() {
     enabled: !!studentId,
   });
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { guardian_visible: false },
   });
@@ -84,13 +85,13 @@ export default function AssessmentsPage() {
             <Card key={a.id}>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-burnt-amber uppercase">{a.assessment_type}</span>
-                  {a.domain && <span className="text-xs text-mist-gray">{a.domain}</span>}
+                  <span className="text-xs font-medium text-charcoal-warm uppercase">{a.assessment_type}</span>
+                  {a.domain && <span className="text-xs text-muted-text">{a.domain}</span>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-mist-gray">{formatDate(a.assessment_date)}</span>
+                  <span className="text-xs text-muted-text">{formatDate(a.assessment_date)}</span>
                   {!a.guardian_visible && (
-                    <span className="text-xs bg-bone text-mist-gray px-2 py-0.5 rounded">Staff only</span>
+                    <span className="text-xs bg-bone text-muted-text px-2 py-0.5 rounded">Staff only</span>
                   )}
                 </div>
               </div>
@@ -98,7 +99,7 @@ export default function AssessmentsPage() {
               {a.recommendations && (
                 <p className="text-xs text-slate-gray"><span className="font-medium">Recommendations:</span> {a.recommendations}</p>
               )}
-              <div className="flex items-center gap-4 mt-1 text-xs text-mist-gray">
+              <div className="flex items-center gap-4 mt-1 text-xs text-muted-text">
                 {(a.assessor_name || a.external_assessor_name) && (
                   <span>Assessor: {a.assessor_name || a.external_assessor_name}</span>
                 )}
@@ -130,10 +131,10 @@ export default function AssessmentsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Assessment Date" htmlFor="assessment_date" error={errors.assessment_date?.message} required>
-                <Input id="assessment_date" type="date" {...register('assessment_date')} />
+                <Input id="assessment_date" type="date" max={today} {...register('assessment_date')} />
               </Field>
               <Field label="Next Review Date" htmlFor="next_review_date">
-                <Input id="next_review_date" type="date" {...register('next_review_date')} />
+                <Input id="next_review_date" type="date" min={watch('assessment_date') || undefined} {...register('next_review_date')} />
               </Field>
             </div>
             <Field label="External Assessor (if applicable)" htmlFor="external_assessor_name">
@@ -149,7 +150,7 @@ export default function AssessmentsPage() {
               <input type="checkbox" id="guardian_visible_as" className="rounded" {...register('guardian_visible')} />
               <label htmlFor="guardian_visible_as" className="text-sm text-slate-gray">Visible to guardians</label>
             </div>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

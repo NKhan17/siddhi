@@ -13,12 +13,12 @@ import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select
 } from '../../components/ui';
-import { formatDate, THERAPY_TYPE_LABELS } from '../../lib/utils';
+import { formatDate, THERAPY_TYPE_LABELS, todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   therapy_type: z.string().min(1),
   session_date: z.string().min(1),
-  duration_minutes: z.coerce.number().int().min(1),
+  duration_minutes: z.coerce.number().int().min(1).max(480, 'Maximum session duration is 480 minutes (8 hours)'),
   progress_notes: z.string().min(1),
   outcome: z.string().optional(),
   next_steps: z.string().optional(),
@@ -35,6 +35,7 @@ export default function TherapyPage() {
   const [filterType, setFilterType] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const today = todayISODate();
   const isTherapist = user?.active_role === 'therapist';
 
   const { data: sessions, isLoading, error } = useQuery<TherapySession[]>({
@@ -102,22 +103,22 @@ export default function TherapyPage() {
             <Card key={s.id}>
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <span className="text-xs font-medium text-burnt-amber uppercase">
+                  <span className="text-xs font-medium text-charcoal-warm uppercase">
                     {THERAPY_TYPE_LABELS[s.therapy_type] || s.therapy_type}
                   </span>
-                  <span className="text-xs text-mist-gray ml-2">{formatDate(s.session_date)}</span>
+                  <span className="text-xs text-muted-text ml-2">{formatDate(s.session_date)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-mist-gray">{s.duration_minutes} min</span>
+                  <span className="text-xs text-muted-text">{s.duration_minutes} min</span>
                   {!s.guardian_visible && (
-                    <span className="text-xs bg-bone text-mist-gray px-2 py-0.5 rounded">Staff only</span>
+                    <span className="text-xs bg-bone text-muted-text px-2 py-0.5 rounded">Staff only</span>
                   )}
                 </div>
               </div>
               <p className="text-sm text-ink-black mb-1">{s.progress_notes}</p>
               {s.outcome && <p className="text-xs text-slate-gray"><span className="font-medium">Outcome:</span> {s.outcome}</p>}
               {s.next_steps && <p className="text-xs text-slate-gray"><span className="font-medium">Next steps:</span> {s.next_steps}</p>}
-              {s.therapist_name && <p className="text-xs text-mist-gray mt-1">By: {s.therapist_name}</p>}
+              {s.therapist_name && <p className="text-xs text-muted-text mt-1">By: {s.therapist_name}</p>}
             </Card>
           ))}
         </div>
@@ -142,10 +143,10 @@ export default function TherapyPage() {
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Session Date" htmlFor="session_date" error={errors.session_date?.message} required>
-                <Input id="session_date" type="date" {...register('session_date')} />
+                <Input id="session_date" type="date" max={today} {...register('session_date')} />
               </Field>
               <Field label="Duration (minutes)" htmlFor="duration_minutes" error={errors.duration_minutes?.message} required>
-                <Input id="duration_minutes" type="number" min={1} {...register('duration_minutes')} />
+                <Input id="duration_minutes" type="number" min={1} max={480} step={1} {...register('duration_minutes')} />
               </Field>
             </div>
             <Field label="Progress Notes" htmlFor="progress_notes" error={errors.progress_notes?.message} required>
@@ -161,7 +162,7 @@ export default function TherapyPage() {
               <input type="checkbox" id="guardian_visible_t" className="rounded" {...register('guardian_visible')} />
               <label htmlFor="guardian_visible_t" className="text-sm text-slate-gray">Visible to guardians</label>
             </div>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

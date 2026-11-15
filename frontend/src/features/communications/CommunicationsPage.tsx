@@ -13,7 +13,7 @@ import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge
 } from '../../components/ui';
-import { formatDate } from '../../lib/utils';
+import { formatDate, todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   interaction_date: z.string().min(1),
@@ -32,6 +32,7 @@ export default function CommunicationsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const today = todayISODate();
   const isGuardian = user?.active_role === 'guardian';
   const canWrite = user?.active_role && ['special_educator', 'school_head', 'school_admin'].includes(user.active_role);
 
@@ -85,23 +86,23 @@ export default function CommunicationsPage() {
             <Card key={i.id}>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-burnt-amber uppercase">{MODE_LABELS[i.mode] || i.mode}</span>
-                  <span className="text-xs text-mist-gray">{formatDate(i.interaction_date)}</span>
+                  <span className="text-xs font-medium text-charcoal-warm uppercase">{MODE_LABELS[i.mode] || i.mode}</span>
+                  <span className="text-xs text-muted-text">{formatDate(i.interaction_date)}</span>
                 </div>
                 <StatusBadge status={i.acknowledgement_status} />
               </div>
               <div className="space-y-1 text-sm">
                 <div>
-                  <p className="text-xs text-mist-gray">Discussion Points</p>
+                  <p className="text-xs text-muted-text">Discussion Points</p>
                   <p className="text-ink-black">{i.discussion_points}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-mist-gray">Action Taken</p>
+                  <p className="text-xs text-muted-text">Action Taken</p>
                   <p className="text-ink-black">{i.action_taken}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-mist-gray">
+                <p className="text-xs text-muted-text">
                   Recorded by: {i.recorded_by_name || 'Staff'}
                   {i.guardian_name && ` · Guardian: ${i.guardian_name}`}
                 </p>
@@ -131,7 +132,7 @@ export default function CommunicationsPage() {
           <form id="comm-form" onSubmit={handleSubmit(d => createMutation.mutate(d))} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Field label="Date" htmlFor="interaction_date" error={errors.interaction_date?.message} required>
-                <Input id="interaction_date" type="date" {...register('interaction_date')} />
+                <Input id="interaction_date" type="date" max={today} {...register('interaction_date')} />
               </Field>
               <Field label="Mode" htmlFor="mode" error={errors.mode?.message} required>
                 <Select id="mode" {...register('mode')}>
@@ -146,7 +147,7 @@ export default function CommunicationsPage() {
             <Field label="Action Taken" htmlFor="action_taken" error={errors.action_taken?.message} required>
               <Textarea id="action_taken" rows={2} {...register('action_taken')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

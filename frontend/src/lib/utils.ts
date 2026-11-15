@@ -2,6 +2,13 @@
  * Utility helpers for Siddhi frontend
  */
 
+/** Current calendar date in the application's India timezone, for date inputs. */
+export function todayISODate(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  const get = (type: string) => parts.find(part => part.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
 /** Format ISO date string to human-readable (e.g. "15 Apr 2026") */
 export function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—';

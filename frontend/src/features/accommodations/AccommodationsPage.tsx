@@ -23,7 +23,7 @@ const schema = z.object({
   effective_from: z.string().min(1),
   effective_to: z.string().optional(),
   is_active: z.boolean(),
-});
+}).refine(values => !values.effective_to || values.effective_to >= values.effective_from, { path: ['effective_to'], message: 'End date must be on or after the effective-from date' });
 type FormValues = z.infer<typeof schema>;
 
 export default function AccommodationsPage() {
@@ -41,7 +41,7 @@ export default function AccommodationsPage() {
     enabled: !!studentId,
   });
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { is_active: true },
   });
@@ -91,13 +91,13 @@ export default function AccommodationsPage() {
             if (!items) return null;
             return (
               <Card key={area}>
-                <h2 className="text-sm font-medium text-burnt-amber uppercase tracking-wide mb-3">{label}</h2>
+                <h2 className="text-sm font-medium text-charcoal-warm uppercase tracking-wide mb-3">{label}</h2>
                 <div className="space-y-3">
                   {items.map(a => (
                     <div key={a.id} className="border-t border-bone pt-3 first:border-0 first:pt-0">
                       <div className="flex items-start justify-between">
                         <p className="text-sm text-ink-black">{a.accommodation}</p>
-                        {!a.is_active && <span className="text-xs text-mist-gray">(inactive)</span>}
+                        {!a.is_active && <span className="text-xs text-muted-text">(inactive)</span>}
                       </div>
                       {a.modification && (
                         <p className="text-xs text-slate-gray mt-0.5"><span className="font-medium">Modification:</span> {a.modification}</p>
@@ -105,7 +105,7 @@ export default function AccommodationsPage() {
                       {a.assistive_technology && (
                         <p className="text-xs text-slate-gray mt-0.5"><span className="font-medium">Assistive tech:</span> {a.assistive_technology}</p>
                       )}
-                      <p className="text-xs text-mist-gray mt-1">
+                      <p className="text-xs text-muted-text mt-1">
                         From: {formatDate(a.effective_from)}
                         {a.effective_to && ` · Until: ${formatDate(a.effective_to)}`}
                         {a.responsible_staff_name && ` · By: ${a.responsible_staff_name}`}
@@ -147,14 +147,14 @@ export default function AccommodationsPage() {
                 <Input id="effective_from" type="date" {...register('effective_from')} />
               </Field>
               <Field label="Effective To" htmlFor="effective_to">
-                <Input id="effective_to" type="date" {...register('effective_to')} />
+                <Input id="effective_to" type="date" min={watch('effective_from') || undefined} {...register('effective_to')} />
               </Field>
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="is_active_a" className="rounded" defaultChecked {...register('is_active')} />
               <label htmlFor="is_active_a" className="text-sm text-slate-gray">Currently active</label>
             </div>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

@@ -9,7 +9,7 @@ import {
   PageHeader, Card, LoadingState, ErrorState, Button, Modal,
   Field, Input
 } from '../../components/ui';
-import { getErrorMessage } from '../../lib/utils';
+import { getErrorMessage, todayISODate } from '../../lib/utils';
 
 export default function ReportsPage() {
   const { user } = useAuth();
@@ -21,6 +21,7 @@ export default function ReportsPage() {
   // Export form state
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const today = todayISODate();
   const [includeDiagnosis, setIncludeDiagnosis] = useState(false);
   const [includeGuardianContact, setIncludeGuardianContact] = useState(false);
 
@@ -75,19 +76,19 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <Card className="p-4 text-center">
                 <p className="text-2xl font-medium text-ink-black">{summary.total_students}</p>
-                <p className="text-xs text-mist-gray">Students</p>
+                <p className="text-xs text-muted-text">Students</p>
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-2xl font-medium text-ink-black">{summary.active_plans}</p>
-                <p className="text-xs text-mist-gray">Active IEPs</p>
+                <p className="text-xs text-muted-text">Active IEPs</p>
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-2xl font-medium text-ink-black">{summary.total_goals}</p>
-                <p className="text-xs text-mist-gray">Total Goals</p>
+                <p className="text-xs text-muted-text">Total Goals</p>
               </Card>
               <Card className="p-4 text-center">
                 <p className="text-2xl font-medium text-ink-black">{summary.achieved_goals}</p>
-                <p className="text-xs text-mist-gray">Goals Achieved</p>
+                <p className="text-xs text-muted-text">Goals Achieved</p>
               </Card>
             </div>
 
@@ -146,15 +147,15 @@ export default function ReportsPage() {
         >
           <div className="space-y-4">
             <p className="text-sm text-slate-gray">
-              Select options below. The export will only include data you are permitted to see.
+              Select options below. The export will only include data you are permitted to see. Date ranges filter each dated worksheet; the Student Database uses enrollment date and IEP Goals use record creation date.
             </p>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="From Date" htmlFor="export_from">
-                <Input id="export_from" type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} />
+                <Input id="export_from" type="date" max={toDate || today} value={fromDate} onChange={e => setFromDate(e.target.value)} />
               </Field>
               <Field label="To Date" htmlFor="export_to">
-                <Input id="export_to" type="date" value={toDate} onChange={e => setToDate(e.target.value)} />
+                <Input id="export_to" type="date" min={fromDate || undefined} max={today} value={toDate} onChange={e => setToDate(e.target.value)} />
               </Field>
             </div>
 
@@ -190,7 +191,7 @@ export default function ReportsPage() {
               <p className="text-xs font-medium text-slate-gray mb-1 flex items-center gap-1">
                 <FileText size={12} /> Export includes 8 worksheets:
               </p>
-              <ul className="text-xs text-mist-gray space-y-0.5">
+              <ul className="text-xs text-muted-text space-y-0.5">
                 {[
                   'Student Database',
                   'IEP Goals',
@@ -205,7 +206,7 @@ export default function ReportsPage() {
             </div>
 
             {exportError && (
-              <p className="text-xs text-burgundy" role="alert">{exportError}</p>
+              <p className="text-xs text-error-text" role="alert">{exportError}</p>
             )}
           </div>
         </Modal>

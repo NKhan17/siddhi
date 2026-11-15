@@ -20,7 +20,7 @@ const planSchema = z.object({
   start_date: z.string().min(1),
   end_date: z.string().min(1),
   status: z.string().default('draft'),
-});
+}).refine(values => values.start_date <= values.end_date, { path: ['end_date'], message: 'End date must be on or after the start date' });
 type PlanInput = z.input<typeof planSchema>;
 type PlanForm = z.output<typeof planSchema>;
 
@@ -42,7 +42,7 @@ function GoalCard({ goal }: { goal: IEPGoal }) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-burnt-amber uppercase">{goal.domain}</span>
+            <span className="text-xs font-medium text-charcoal-warm uppercase">{goal.domain}</span>
             <StatusBadge status={goal.status} />
           </div>
           <p className="text-sm text-ink-black">{goal.annual_goal}</p>
@@ -51,7 +51,7 @@ function GoalCard({ goal }: { goal: IEPGoal }) {
           onClick={() => setExpanded(e => !e)}
           aria-expanded={expanded}
           aria-label={expanded ? 'Collapse goal' : 'Expand goal'}
-          className="text-mist-gray hover:text-ink-black"
+          className="text-muted-text hover:text-ink-black"
         >
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
@@ -181,12 +181,12 @@ export default function IEPPage() {
                 <Card className="mb-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs text-mist-gray">Academic Year</p>
+                      <p className="text-xs text-muted-text">Academic Year</p>
                       <p className="font-medium text-ink-black">{selectedPlan.academic_year}</p>
                     </div>
                     <StatusBadge status={selectedPlan.status} />
                   </div>
-                  <div className="mt-2 flex gap-6 text-xs text-mist-gray">
+                  <div className="mt-2 flex gap-6 text-xs text-muted-text">
                     <span>Start: {formatDate(selectedPlan.start_date)}</span>
                     <span>End: {formatDate(selectedPlan.end_date)}</span>
                     <span>Version {selectedPlan.version}</span>
@@ -231,10 +231,10 @@ export default function IEPPage() {
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Start Date" htmlFor="start_date" error={planForm.formState.errors.start_date?.message} required>
-                <Input id="start_date" type="date" {...planForm.register('start_date')} />
+                <Input id="start_date" type="date" max={planForm.watch('end_date') || undefined} {...planForm.register('start_date')} />
               </Field>
               <Field label="End Date" htmlFor="end_date" error={planForm.formState.errors.end_date?.message} required>
-                <Input id="end_date" type="date" {...planForm.register('end_date')} />
+                <Input id="end_date" type="date" min={planForm.watch('start_date') || undefined} {...planForm.register('end_date')} />
               </Field>
             </div>
             <Field label="Status" htmlFor="status">
@@ -243,7 +243,7 @@ export default function IEPPage() {
                 <option value="active">Active</option>
               </Select>
             </Field>
-            {planServerError && <p className="text-xs text-burgundy" role="alert">{planServerError}</p>}
+            {planServerError && <p className="text-xs text-error-text" role="alert">{planServerError}</p>}
           </form>
         </Modal>
 
@@ -275,7 +275,7 @@ export default function IEPPage() {
             <Field label="Evaluation Method" htmlFor="evaluation_method" error={goalForm.formState.errors.evaluation_method?.message} required>
               <Input id="evaluation_method" {...goalForm.register('evaluation_method')} />
             </Field>
-            {goalServerError && <p className="text-xs text-burgundy" role="alert">{goalServerError}</p>}
+            {goalServerError && <p className="text-xs text-error-text" role="alert">{goalServerError}</p>}
           </form>
         </Modal>
       </div>

@@ -48,7 +48,7 @@ export function Button({
   return (
     <button
       className={`
-        inline-flex items-center justify-center gap-2 rounded-full font-medium
+        inline-flex h-auto min-h-9 max-w-full min-w-0 flex-wrap items-center justify-center gap-2 whitespace-normal break-words rounded-full font-medium text-center leading-snug
         transition-colors duration-150 focus-visible:outline-none
         focus-visible:ring-2 focus-visible:ring-burnt-amber focus-visible:ring-offset-1
         disabled:opacity-50 disabled:cursor-not-allowed
@@ -84,12 +84,12 @@ const STATUS_COLORS: Record<string, string> = {
   approved: 'bg-pale-sage text-ink-black',
   draft: 'bg-bone text-slate-gray',
   in_review: 'bg-lavender-mist text-deep-violet',
-  archived: 'bg-bone text-mist-gray',
+  archived: 'bg-bone text-muted-text',
   not_started: 'bg-bone text-slate-gray',
   in_progress: 'bg-lavender-mist text-deep-violet',
   achieved: 'bg-pale-sage text-ink-black',
   not_achieved: 'bg-dusty-rose text-ink-black',
-  on_hold: 'bg-bone text-mist-gray',
+  on_hold: 'bg-bone text-muted-text',
   scheduled: 'bg-lavender-mist text-deep-violet',
   revision_required: 'bg-dusty-rose text-ink-black',
   pending: 'bg-lavender-mist text-deep-violet',
@@ -127,7 +127,7 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <p className="text-lg font-medium text-slate-gray mb-1">{title}</p>
       {description && (
-        <p className="text-sm text-mist-gray max-w-sm mb-4">{description}</p>
+        <p className="text-sm text-muted-text max-w-sm mb-4">{description}</p>
       )}
       {action}
     </div>
@@ -148,7 +148,7 @@ export function LoadingState({ message = 'Loading…' }: { message?: string }) {
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <p className="text-sm text-burgundy mb-3">{message}</p>
+      <p className="text-sm text-error-text mb-3">{message}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
           Try again
@@ -287,12 +287,12 @@ export function Field({ label, htmlFor, error, hint, required, children }: Field
     <div className="space-y-1">
       <label htmlFor={htmlFor} className="block text-sm font-medium text-slate-gray">
         {label}
-        {required && <span className="text-burgundy ml-0.5">*</span>}
+        {required && <span className="text-error-text ml-0.5">*</span>}
       </label>
       {children}
-      {hint && !error && <p className="text-xs text-mist-gray">{hint}</p>}
+      {hint && !error && <p className="text-xs text-muted-text">{hint}</p>}
       {error && (
-        <p className="text-xs text-burgundy" role="alert">
+        <p className="text-xs text-error-text" role="alert">
           {error}
         </p>
       )}
@@ -308,7 +308,7 @@ export function Input({
   return (
     <input
       className={`w-full px-3 py-2 text-sm border rounded-lg bg-white text-ink-black
-        placeholder:text-mist-gray focus:outline-none focus:ring-2 focus:ring-deep-violet/30
+        placeholder:text-muted-text focus:outline-none focus:ring-2 focus:ring-deep-violet/30
         ${error ? 'border-burgundy' : 'border-pale-sage'} ${className}`}
       {...props}
     />
@@ -323,7 +323,7 @@ export function Textarea({
   return (
     <textarea
       className={`w-full px-3 py-2 text-sm border rounded-lg bg-white text-ink-black
-        placeholder:text-mist-gray focus:outline-none focus:ring-2 focus:ring-deep-violet/30
+        placeholder:text-muted-text focus:outline-none focus:ring-2 focus:ring-deep-violet/30
         resize-y min-h-20
         ${error ? 'border-burgundy' : 'border-pale-sage'} ${className}`}
       {...props}

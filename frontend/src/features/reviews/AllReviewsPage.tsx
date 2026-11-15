@@ -29,7 +29,7 @@ export default function AllReviewsPage() {
             return <Card key={review.id} className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-burnt-amber">{review.review_type.replace(/_/g, ' ')} review</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-charcoal-warm">{review.review_type.replace(/_/g, ' ')} review</p>
                   <Link to={`/students/${review.student_id}/reviews`} className="mt-1 inline-block text-base font-medium text-ink-black underline decoration-ink/30 underline-offset-4 hover:decoration-ink">{review.student_name}</Link>
                   <p className="mt-1 text-xs text-graphite">{review.grade_class} · IEP {review.academic_year} · Scheduled {formatDate(review.scheduled_date)}</p>
                 </div>

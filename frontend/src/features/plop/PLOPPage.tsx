@@ -10,7 +10,7 @@ import type { PLOPRecord } from '../../types';
 import { useAuth } from '../../app/AuthContext';
 import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Textarea, Select } from '../../components/ui';
-import { formatDate, PLOP_DOMAIN_LABELS } from '../../lib/utils';
+import { formatDate, PLOP_DOMAIN_LABELS, todayISODate } from '../../lib/utils';
 
 const DOMAINS = Object.entries(PLOP_DOMAIN_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -32,6 +32,7 @@ export default function PLOPPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const today = todayISODate();
   const canWrite = user?.active_role && ['special_educator', 'psychologist', 'therapist'].includes(user.active_role);
 
   const { data: records, isLoading, error } = useQuery<PLOPRecord[]>({
@@ -95,30 +96,30 @@ export default function PLOPPage() {
               <Card key={domain}>
                 <div className="flex items-start justify-between mb-3">
                   <h2 className="text-base font-medium text-ink-black">{label}</h2>
-                  <span className="text-xs text-mist-gray">{formatDate(latest.assessed_at)}</span>
+                  <span className="text-xs text-muted-text">{formatDate(latest.assessed_at)}</span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div>
-                    <p className="text-xs text-mist-gray mb-0.5">Current Performance</p>
+                    <p className="text-xs text-muted-text mb-0.5">Current Performance</p>
                     <p className="text-ink-black">{latest.current_performance}</p>
                   </div>
                   {latest.baseline_value && (
                     <div>
-                      <p className="text-xs text-mist-gray mb-0.5">Baseline</p>
+                      <p className="text-xs text-muted-text mb-0.5">Baseline</p>
                       <p className="text-ink-black">{latest.baseline_value}</p>
                     </div>
                   )}
                   <div className="flex items-center gap-4">
-                    <span className="text-xs text-mist-gray">Method: {latest.assessment_method}</span>
+                    <span className="text-xs text-muted-text">Method: {latest.assessment_method}</span>
                     {latest.assessed_by_name && (
-                      <span className="text-xs text-mist-gray">By: {latest.assessed_by_name}</span>
+                      <span className="text-xs text-muted-text">By: {latest.assessed_by_name}</span>
                     )}
                     {!latest.guardian_visible && (
-                      <span className="text-xs bg-bone text-mist-gray px-2 py-0.5 rounded">Staff only</span>
+                      <span className="text-xs bg-bone text-muted-text px-2 py-0.5 rounded">Staff only</span>
                     )}
                   </div>
                   {recs.length > 1 && (
-                    <p className="text-xs text-mist-gray">{recs.length - 1} earlier record(s) archived</p>
+                    <p className="text-xs text-muted-text">{recs.length - 1} earlier record(s) archived</p>
                   )}
                 </div>
               </Card>
@@ -158,13 +159,13 @@ export default function PLOPPage() {
               <Textarea id="remarks" rows={2} {...register('remarks')} />
             </Field>
             <Field label="Assessment Date" htmlFor="assessed_at" error={errors.assessed_at?.message} required>
-              <Input id="assessed_at" type="date" error={!!errors.assessed_at} {...register('assessed_at')} />
+              <Input id="assessed_at" type="date" max={today} error={!!errors.assessed_at} {...register('assessed_at')} />
             </Field>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="guardian_visible" className="rounded" {...register('guardian_visible')} />
               <label htmlFor="guardian_visible" className="text-sm text-slate-gray">Visible to guardians</label>
             </div>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

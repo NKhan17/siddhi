@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { api } from '../../lib/api';
 import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Select, StatusBadge, DataTable } from '../../components/ui';
-import { formatDate } from '../../lib/utils';
+import { formatDate, todayISODate } from '../../lib/utils';
 
 type StudentAttendance = {
   student_id: string; full_name: string; grade_class: string; disability_category: string;
@@ -28,6 +28,7 @@ export default function AllAttendancePage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
+  const today = todayISODate();
 
   const { data, isLoading, error } = useQuery<AttendanceData>({
     queryKey: ['school-attendance', fromDate, toDate],
@@ -77,8 +78,8 @@ export default function AllAttendancePage() {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-medium text-ink-black">Daily attendance log</h2>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="text-xs text-graphite">From <Input aria-label="From date" type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="ml-1 w-auto" /></label>
-              <label className="text-xs text-graphite">To <Input aria-label="To date" type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="ml-1 w-auto" /></label>
+              <label className="text-xs text-graphite">From <Input aria-label="From date" type="date" max={toDate || today} value={fromDate} onChange={e => setFromDate(e.target.value)} className="ml-1 w-auto" /></label>
+              <label className="text-xs text-graphite">To <Input aria-label="To date" type="date" min={fromDate || undefined} max={today} value={toDate} onChange={e => setToDate(e.target.value)} className="ml-1 w-auto" /></label>
               {(fromDate || toDate) && <Button variant="ghost" size="sm" onClick={() => { setFromDate(''); setToDate(''); }}>Clear</Button>}
             </div>
           </div>
@@ -94,10 +95,10 @@ export default function AllAttendancePage() {
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Record Attendance" footer={<><Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button><Button onClick={() => mutation.mutate()} loading={mutation.isPending} disabled={!studentId || !attendanceDate}>Save</Button></>}>
           <div className="space-y-4">
             <Field label="Student" htmlFor="all-attendance-student" required><Select id="all-attendance-student" value={studentId} onChange={e => setStudentId(e.target.value)}><option value="">Select student…</option>{students.map(s => <option key={s.student_id} value={s.student_id}>{s.full_name} · {s.grade_class}</option>)}</Select></Field>
-            <Field label="Date" htmlFor="all-attendance-date" required><Input id="all-attendance-date" type="date" value={attendanceDate} onChange={e => setAttendanceDate(e.target.value)} /></Field>
+            <Field label="Date" htmlFor="all-attendance-date" required><Input id="all-attendance-date" type="date" max={today} value={attendanceDate} onChange={e => setAttendanceDate(e.target.value)} /></Field>
             <Field label="Status" htmlFor="all-attendance-status" required><Select id="all-attendance-status" value={status} onChange={e => setStatus(e.target.value)}><option value="present">Present</option><option value="absent">Absent</option><option value="leave">Leave</option><option value="other">Other</option></Select></Field>
             <Field label="Reason (optional)" htmlFor="all-attendance-reason"><Input id="all-attendance-reason" value={reason} onChange={e => setReason(e.target.value)} /></Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </div>
         </Modal>
       </div>

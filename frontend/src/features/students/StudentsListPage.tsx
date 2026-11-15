@@ -1,24 +1,30 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from '../../lib/navigation';
+import { useNavigate, useSearchParams } from '../../lib/navigation';
 import { Search } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { StudentListResponse } from '../../types';
 import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, LoadingState, ErrorState, EmptyState, Button, Input } from '../../components/ui';
 import { ageFromDob } from '../../lib/utils';
+import { useAuth } from '../../app/AuthContext';
 
 export default function StudentsListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const gradeClass = searchParams.get('grade_class') || '';
+  const isAssignedRole = ['therapist','psychologist','psychiatrist'].includes(user?.active_role || '');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
   const { data, isLoading, error } = useQuery<StudentListResponse>({
-    queryKey: ['students', search, page],
+    queryKey: ['students', search, page, gradeClass],
     queryFn: () =>
       api.get<StudentListResponse>('/students', {
         search: search || undefined,
+        grade_class: gradeClass || undefined,
         page,
         page_size: pageSize,
       }),
@@ -27,13 +33,13 @@ export default function StudentsListPage() {
 
   return (
     <PageShell>
-      <PageHeader title="Students" subtitle="All students in your school" />
+      <PageHeader title={gradeClass ? `Students · ${gradeClass}` : "Students"} subtitle={isAssignedRole ? "All students assigned to you" : gradeClass ? `Students in ${gradeClass}` : "All students in your school"} actions={gradeClass ? <Button variant="outline" size="sm" onClick={() => navigate('/students')}>Clear class filter</Button> : undefined} />
 
       {/* Search */}
       <div className="relative mb-5 max-w-sm">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-gray"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-text"
           aria-hidden="true"
         />
         <Input
@@ -54,7 +60,7 @@ export default function StudentsListPage() {
           {data.items.length === 0 ? (
             <EmptyState
               title="No students found"
-              description={search ? 'Try a different search term.' : 'No students are registered yet.'}
+              description={search ? 'Try a different search term.' : gradeClass ? 'No students are listed in this class.' : 'No students are registered yet.'}
             />
           ) : (
             <>
@@ -76,7 +82,7 @@ export default function StudentsListPage() {
                         {student.disability_category}
                       </p>
                     </div>
-                    <div className="hidden sm:block text-xs text-mist-gray">
+                    <div className="hidden sm:block text-xs text-muted-text">
                       {student.admission_number}
                     </div>
                   </button>
@@ -86,7 +92,7 @@ export default function StudentsListPage() {
               {/* Pagination */}
               {data.total > pageSize && (
                 <div className="flex items-center justify-between mt-6 text-sm">
-                  <p className="text-mist-gray text-xs">
+                  <p className="text-muted-text text-xs">
                     {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, data.total)} of {data.total}
                   </p>
                   <div className="flex gap-2">

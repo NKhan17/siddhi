@@ -16,7 +16,7 @@ import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge, RatingScale
 } from '../../components/ui';
-import { formatDate, RATING_LABELS } from '../../lib/utils';
+import { formatDate, RATING_LABELS, todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   term: z.string().min(1),
@@ -56,7 +56,7 @@ function GoalProgressCard({
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-burnt-amber uppercase">{summary.domain}</span>
+            <span className="text-xs font-medium text-charcoal-warm uppercase">{summary.domain}</span>
             <StatusBadge status={summary.goal_status} />
           </div>
           <p className="text-sm text-ink-black">{summary.annual_goal}</p>
@@ -74,12 +74,12 @@ function GoalProgressCard({
           const val = summary[t as keyof GoalProgressSummary] as number | undefined;
           return (
             <div key={t} className="text-center">
-              <p className="text-xs text-mist-gray mb-1">{TERM_LABELS[t]}</p>
+              <p className="text-xs text-muted-text mb-1">{TERM_LABELS[t]}</p>
               <div
                 className={`mx-auto w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border
                   ${val !== undefined && val !== null
                     ? 'bg-burnt-amber text-white border-burnt-amber'
-                    : 'bg-bone text-mist-gray border-bone'
+                    : 'bg-bone text-muted-text border-bone'
                   }`}
                 aria-label={val !== undefined && val !== null ? `${TERM_LABELS[t]}: ${val} – ${RATING_LABELS[val]}` : `${TERM_LABELS[t]}: not recorded`}
               >
@@ -126,7 +126,7 @@ function GoalProgressCard({
       )}
 
       {summary.latest_observed_at && (
-        <p className="text-xs text-mist-gray mt-2">
+        <p className="text-xs text-muted-text mt-2">
           Latest: {formatDate(summary.latest_observed_at)}
           {summary.latest_rating_label && ` · ${summary.latest_rating_label}`}
         </p>
@@ -143,6 +143,7 @@ export default function ProgressPage() {
   const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const today = todayISODate();
   const canAdd = user?.active_role && ['special_educator', 'therapist', 'school_head'].includes(user.active_role);
 
   const { data: summaries, isLoading, error } = useQuery<GoalProgressSummary[]>({
@@ -226,9 +227,9 @@ export default function ProgressPage() {
               <Textarea id="observation" rows={3} {...register('observation')} />
             </Field>
             <Field label="Observation Date" htmlFor="observed_at" error={errors.observed_at?.message} required>
-              <Input id="observed_at" type="date" {...register('observed_at')} />
+              <Input id="observed_at" type="date" max={today} {...register('observed_at')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

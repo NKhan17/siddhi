@@ -23,6 +23,10 @@ Frontify operates as an editorial brand-management workspace: a warm cream canva
 | Signal Orange | `#ff3b00` | `--color-signal-orange` | Sole chromatic accent — highlights, active tags, icon fills, decorative punctuation. Used sparingly to make functional moments feel switched on against the warm monochrome |
 | Deep Teal | `#042a2b` | `--color-deep-teal` | Gray outline accent for tags, dividers, and focused UI edges. |
 
+## Accessibility — Text Contrast
+
+All text, including secondary labels, helper text, metadata, disabled-looking status labels, and table annotations, must remain clearly readable against its rendered background. Use Ink (`#111110`) for primary text and Charcoal Warm (`#464643`) for secondary text on Gallery White (`#ffffff`) and Warm Parchment (`#f0f0eb`). Graphite Warm (`#575753`) is acceptable for secondary text only where the rendered contrast remains readable. Ash Gray (`#bfbfb8`), Pale Stone (`#cbcbc5`), Mist Gray (`#d7d7cf`), and Soft Linen (`#e1e1db`) are for borders, fills, and decorative details—not text on light surfaces. Do not reduce text opacity to create hierarchy; establish hierarchy with weight, size, and spacing instead. Status badges and metadata must use a foreground/background pair with sufficient contrast.
+
 ## Tokens — Typography
 
 ### Cranny — Display and editorial heading face — high-contrast serif used for hero headlines and section titles at 40–96px. Weight 300 at display sizes creates a whisper-soft authority; weight 400 carries through subheadings. This is the brand's typographic signature: an editorial serif in a sea of SaaS grotesques. · `--font-cranny`

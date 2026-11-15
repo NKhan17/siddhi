@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-sm text-slate-gray">Invalid reset link.</p>
-          <Link to="/login" className="text-xs underline text-burnt-amber mt-2 block">Back to sign in</Link>
+          <Link to="/login" className="text-xs underline text-ink mt-2 block">Back to sign in</Link>
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
             <Field label="Confirm password" htmlFor="confirm" error={errors.confirm?.message} required>
               <Input id="confirm" type="password" autoComplete="new-password" error={!!errors.confirm} {...register('confirm')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
             <Button type="submit" className="w-full" loading={isSubmitting}>Set password</Button>
           </form>
         )}

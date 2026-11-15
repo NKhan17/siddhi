@@ -30,7 +30,7 @@ function StudentNavLink({
         <span className="text-burnt-amber" aria-hidden="true">{icon}</span>
         <span className="text-sm text-ink-black">{label}</span>
       </div>
-      <ChevronRight size={14} className="text-mist-gray" aria-hidden="true" />
+      <ChevronRight size={14} className="text-muted-text" aria-hidden="true" />
     </Link>
   );
 }
@@ -81,40 +81,40 @@ export default function StudentProfilePage() {
               <h2 className="text-sm font-medium text-slate-gray uppercase tracking-wide mb-3">Student Information</h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-xs text-mist-gray">Admission No.</dt>
+                  <dt className="text-xs text-muted-text">Admission No.</dt>
                   <dd className="font-medium text-ink-black font-mono">{student.admission_number}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-mist-gray">Date of Birth</dt>
+                  <dt className="text-xs text-muted-text">Date of Birth</dt>
                   <dd className="font-medium text-ink-black">{formatDate(student.date_of_birth)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-mist-gray">Gender</dt>
+                  <dt className="text-xs text-muted-text">Gender</dt>
                   <dd className="font-medium text-ink-black">{student.gender || '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-mist-gray">Enrolment Date</dt>
+                  <dt className="text-xs text-muted-text">Enrolment Date</dt>
                   <dd className="font-medium text-ink-black">{formatDate(student.enrollment_date)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-mist-gray">Disability Category</dt>
+                  <dt className="text-xs text-muted-text">Disability Category</dt>
                   <dd className="font-medium text-ink-black">{student.disability_category}</dd>
                 </div>
                 {student.udid_number_masked && (
                   <div>
-                    <dt className="text-xs text-mist-gray">UDID (masked)</dt>
+                    <dt className="text-xs text-muted-text">UDID (masked)</dt>
                     <dd className="font-mono text-ink-black">{student.udid_number_masked}</dd>
                   </div>
                 )}
                 {student.languages_known && (
                   <div>
-                    <dt className="text-xs text-mist-gray">Languages</dt>
+                    <dt className="text-xs text-muted-text">Languages</dt>
                     <dd className="font-medium text-ink-black">{student.languages_known}</dd>
                   </div>
                 )}
                 {student.assistive_devices && (
                   <div>
-                    <dt className="text-xs text-mist-gray">Assistive Devices</dt>
+                    <dt className="text-xs text-muted-text">Assistive Devices</dt>
                     <dd className="font-medium text-ink-black">{student.assistive_devices}</dd>
                   </div>
                 )}
@@ -127,19 +127,19 @@ export default function StudentProfilePage() {
                 <div className="space-y-3 text-sm">
                   {student.strengths && (
                     <div>
-                      <p className="text-xs text-mist-gray mb-1">Strengths</p>
+                      <p className="text-xs text-muted-text mb-1">Strengths</p>
                       <p className="text-ink-black">{student.strengths}</p>
                     </div>
                   )}
                   {student.areas_of_need && (
                     <div>
-                      <p className="text-xs text-mist-gray mb-1">Areas of Need</p>
+                      <p className="text-xs text-muted-text mb-1">Areas of Need</p>
                       <p className="text-ink-black">{student.areas_of_need}</p>
                     </div>
                   )}
                   {student.learning_style && (
                     <div>
-                      <p className="text-xs text-mist-gray mb-1">Learning Style</p>
+                      <p className="text-xs text-muted-text mb-1">Learning Style</p>
                       <p className="text-ink-black">{student.learning_style}</p>
                     </div>
                   )}
@@ -184,7 +184,7 @@ export default function StudentProfilePage() {
                       </div>
                       <div>
                         <p className="text-ink-black">{s.full_name}</p>
-                        <p className="text-xs text-mist-gray capitalize">{s.role.replace(/_/g, ' ')}</p>
+                        <p className="text-xs text-muted-text capitalize">{s.role.replace(/_/g, ' ')}</p>
                       </div>
                     </li>
                   ))}
@@ -203,7 +203,7 @@ export default function StudentProfilePage() {
                       </div>
                       <div>
                         <p className="text-ink-black">{g.full_name}</p>
-                        <p className="text-xs text-mist-gray">{g.relationship_label || 'Guardian'}{g.is_primary ? ' (Primary)' : ''}</p>
+                        <p className="text-xs text-muted-text">{g.relationship_label || 'Guardian'}{g.is_primary ? ' (Primary)' : ''}</p>
                       </div>
                     </li>
                   ))}

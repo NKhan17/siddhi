@@ -117,7 +117,7 @@ export default function LoginPage() {
             </Field>
 
             {serverError && (
-              <p className="text-xs text-burgundy bg-dusty-rose/20 rounded-lg px-3 py-2" role="alert">
+              <p className="text-xs text-error-text bg-dusty-rose/20 rounded-lg px-3 py-2" role="alert">
                 {serverError}
               </p>
             )}

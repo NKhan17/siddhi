@@ -10,6 +10,7 @@ import { api } from '../../lib/api';
 import type { StudentDetail } from '../../types';
 import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, Field, Input, Textarea, Button, LoadingState, ErrorState } from '../../components/ui';
+import { todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   full_name: z.string().min(1),
@@ -37,6 +38,7 @@ export default function StudentEditPage() {
     enabled: !!studentId,
   });
   const form = useForm<Values>({ resolver: zodResolver(schema) });
+  const today = todayISODate();
   useEffect(() => {
     if (student) form.reset({
       full_name: student.full_name,
@@ -65,10 +67,10 @@ export default function StudentEditPage() {
   return <PageShell><div className="max-w-3xl mx-auto"><PageHeader title="Edit Student Profile" subtitle={student.full_name} /><Card><form onSubmit={form.handleSubmit(values => mutation.mutate(values))} className="space-y-5">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Field label="Full name" htmlFor="full_name" required><Input id="full_name" {...form.register('full_name')} /></Field>
-      <Field label="Date of birth" htmlFor="date_of_birth" required><Input id="date_of_birth" type="date" {...form.register('date_of_birth')} /></Field>
+      <Field label="Date of birth" htmlFor="date_of_birth" required><Input id="date_of_birth" type="date" max={today} {...form.register('date_of_birth')} /></Field>
       <Field label="Gender" htmlFor="gender"><Input id="gender" {...form.register('gender')} /></Field>
       <Field label="Disability category" htmlFor="disability_category" required><Input id="disability_category" {...form.register('disability_category')} /></Field>
-      <Field label="Enrollment date" htmlFor="enrollment_date" required><Input id="enrollment_date" type="date" {...form.register('enrollment_date')} /></Field>
+      <Field label="Enrollment date" htmlFor="enrollment_date" required><Input id="enrollment_date" type="date" max={today} min={form.watch('date_of_birth') || undefined} {...form.register('enrollment_date')} /></Field>
       <Field label="Grade / class" htmlFor="grade_class" required><Input id="grade_class" {...form.register('grade_class')} /></Field>
       <Field label="Diagnosis" htmlFor="diagnosis"><Textarea id="diagnosis" rows={2} {...form.register('diagnosis')} /></Field>
       <Field label="Strengths" htmlFor="strengths"><Textarea id="strengths" rows={2} {...form.register('strengths')} /></Field>
@@ -77,7 +79,7 @@ export default function StudentEditPage() {
       <Field label="Languages known" htmlFor="languages_known"><Input id="languages_known" {...form.register('languages_known')} /></Field>
       <Field label="Assistive devices" htmlFor="assistive_devices"><Textarea id="assistive_devices" rows={2} {...form.register('assistive_devices')} /></Field>
     </div>
-    {mutation.error && <p className="text-sm text-burgundy" role="alert">{mutation.error instanceof Error ? mutation.error.message : 'Unable to save changes.'}</p>}
+    {mutation.error && <p className="text-sm text-error-text" role="alert">{mutation.error instanceof Error ? mutation.error.message : 'Unable to save changes.'}</p>}
     <div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => navigate(`/students/${studentId}`)}>Cancel</Button><Button type="submit" loading={mutation.isPending}>Save changes</Button></div>
   </form></Card></div></PageShell>;
 }

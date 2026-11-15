@@ -13,7 +13,7 @@ import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Select, StatusBadge, DataTable
 } from '../../components/ui';
-import { formatDate } from '../../lib/utils';
+import { formatDate, todayISODate } from '../../lib/utils';
 
 const schema = z.object({
   attendance_date: z.string().min(1),
@@ -31,11 +31,12 @@ export default function AttendancePage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
+  const today = todayISODate();
   const canWrite = user?.active_role && ['special_educator', 'school_head', 'school_admin'].includes(user.active_role);
 
   const { data: summary } = useQuery<AttendanceSummary>({
-    queryKey: ['attendance-summary', studentId],
-    queryFn: () => api.get(`/students/${studentId}/attendance/summary`),
+    queryKey: ['attendance-summary', studentId, fromDate, toDate],
+    queryFn: () => api.get(`/students/${studentId}/attendance/summary`, { from_date: fromDate || undefined, to_date: toDate || undefined }),
     enabled: !!studentId,
   });
 
@@ -87,7 +88,7 @@ export default function AttendancePage() {
               { label: 'Attendance %', value: `${summary.attendance_pct}%` },
             ].map(({ label, value }) => (
               <Card key={label} className="p-3 text-center">
-                <p className="text-xs text-mist-gray mb-1">{label}</p>
+                <p className="text-xs text-muted-text mb-1">{label}</p>
                 <p className="text-xl font-medium text-ink-black">{value}</p>
               </Card>
             ))}
@@ -97,12 +98,12 @@ export default function AttendancePage() {
         {/* Date filters */}
         <div className="flex gap-3 mb-5 flex-wrap">
           <div className="flex items-center gap-2">
-            <label className="text-xs text-mist-gray">From:</label>
-            <Input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-auto" />
+            <label className="text-xs text-muted-text">From:</label>
+            <Input type="date" max={toDate || today} value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-auto" />
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-mist-gray">To:</label>
-            <Input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-auto" />
+            <label className="text-xs text-muted-text">To:</label>
+            <Input type="date" min={fromDate || undefined} max={today} value={toDate} onChange={e => setToDate(e.target.value)} className="w-auto" />
           </div>
           {(fromDate || toDate) && (
             <Button variant="ghost" size="sm" onClick={() => { setFromDate(''); setToDate(''); }}>Clear</Button>
@@ -122,7 +123,7 @@ export default function AttendancePage() {
               { key: 'date', header: 'Date', render: r => formatDate(r.attendance_date) },
               { key: 'status', header: 'Status', render: r => <StatusBadge status={r.status} /> },
               { key: 'reason', header: 'Reason', render: r => <span className="text-xs text-slate-gray">{r.reason || '—'}</span> },
-              { key: 'by', header: 'Recorded By', render: r => <span className="text-xs text-mist-gray">{r.recorded_by_name || '—'}</span> },
+              { key: 'by', header: 'Recorded By', render: r => <span className="text-xs text-muted-text">{r.recorded_by_name || '—'}</span> },
             ]}
             data={data}
             keyExtractor={r => r.id}
@@ -139,7 +140,7 @@ export default function AttendancePage() {
         >
           <form id="att-form" onSubmit={handleSubmit(d => mutation.mutate(d))} className="space-y-4">
             <Field label="Date" htmlFor="attendance_date" error={errors.attendance_date?.message} required>
-              <Input id="attendance_date" type="date" {...register('attendance_date')} />
+              <Input id="attendance_date" type="date" max={today} {...register('attendance_date')} />
             </Field>
             <Field label="Status" htmlFor="status" error={errors.status?.message} required>
               <Select id="status" {...register('status')}>
@@ -153,7 +154,7 @@ export default function AttendancePage() {
             <Field label="Reason (optional)" htmlFor="reason">
               <Input id="reason" {...register('reason')} />
             </Field>
-            {serverError && <p className="text-xs text-burgundy" role="alert">{serverError}</p>}
+            {serverError && <p className="text-xs text-error-text" role="alert">{serverError}</p>}
           </form>
         </Modal>
       </div>

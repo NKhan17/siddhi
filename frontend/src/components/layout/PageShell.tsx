@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Menu, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, LogOut, ChevronDown, ArrowLeft } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../app/AuthContext';
 import { api } from '../../lib/api';
@@ -36,7 +36,17 @@ export function PageShell({ children }: PageShellProps) {
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-ink/15 bg-warm-parchment/95 px-4 backdrop-blur-sm sm:px-7 lg:px-9">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              onClick={() => {
+                const fallback = pathname.startsWith('/students/') ? `/students/${pathname.split('/')[2]}` : user?.active_role === 'guardian' ? '/guardian' : '/staff';
+                if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) router.back();
+                else router.push(fallback);
+              }}
+              className="rounded-full border border-ink/20 p-2 text-ink transition-colors hover:bg-gallery-white"
+              aria-label="Go back"
+              title="Go back"
+            ><ArrowLeft size={17} /></button>
             <button onClick={() => setMobileOpen(true)} className="rounded-full border border-ink/20 p-2 text-ink hover:bg-gallery-white md:hidden" aria-label="Open navigation"><Menu size={18} /></button>
             <div className="min-w-0">
               <p className="truncate text-[11px] font-medium uppercase tracking-[0.18em] text-graphite">Siddhi workspace</p>

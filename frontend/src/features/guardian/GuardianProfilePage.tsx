@@ -20,7 +20,7 @@ export default function GuardianProfilePage() {
     <PageShell>
       <div className="space-y-8">
         <section className="rounded-lg border border-ink/80 bg-gallery-white p-6 sm:p-9 lg:p-10">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-signal-orange">Account</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-charcoal-warm">Account</p>
           <h1 className="mt-3 font-display text-[44px] leading-[1.02] text-ink sm:text-[58px]">Guardian</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-graphite">Your contact details and the children linked to your account.</p>
           {isLoading && <LoadingState message="Loading your profile…" />}
@@ -54,7 +54,7 @@ export default function GuardianProfilePage() {
                     <Avatar name={child.full_name} imageUrl={child.profile_image_path} size="lg" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-ink">{child.full_name}</p>
-                      <p className="mt-1 truncate text-xs text-graphite">{child.grade_class} <span className="px-1 text-ash-gray">·</span> {ageFromDob(child.date_of_birth)} years <span className="px-1 text-ash-gray">·</span> {child.relationship_label || 'Guardian'}</p>
+                      <p className="mt-1 truncate text-xs text-graphite">{child.grade_class} <span className="px-1 text-muted-text">·</span> {ageFromDob(child.date_of_birth)} years <span className="px-1 text-muted-text">·</span> {child.relationship_label || 'Guardian'}</p>
                     </div>
                     <span className="hidden items-center gap-2 text-xs text-graphite sm:flex">View profile <ChevronRight size={15} className="transition-transform group-hover:translate-x-1" /></span>
                     <ChevronRight size={18} className="text-graphite sm:hidden" />

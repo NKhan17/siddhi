@@ -37,6 +37,31 @@ async function studentAccess(actor: Actor, studentId: string, write = false) {
   return found.rows[0];
 }
 
+function localTodayISO() {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  const part = (type: string) => parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+function assertDate(value: unknown, label: string, allowFuture = false) {
+  if (value == null || value === '') return;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) fail(400, `${label} must be a valid date`);
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) fail(400, `${label} must be a valid date`);
+  if (!allowFuture && value > localTodayISO()) fail(400, `${label} cannot be in the future`);
+}
+
+function assertDateRange(from: unknown, to: unknown, label = 'Date range', allowFuture = false) {
+  if (from) assertDate(from, 'From date', allowFuture);
+  if (to) assertDate(to, 'To date', allowFuture);
+  if (typeof from === 'string' && typeof to === 'string' && from && to && from > to) fail(400, `${label}: From date must be on or before To date`);
+}
+
+function assertDuration(value: unknown) {
+  const duration = Number(value);
+  if (!Number.isInteger(duration) || duration < 1 || duration > 480) fail(400, 'Duration must be between 1 and 480 minutes (8 hours)');
+}
+
 const rows = async (sql: string, params: unknown[] = []) => (await database().query<Row>(sql, params)).rows;
 const one = async (sql: string, params: unknown[] = []) => (await rows(sql, params))[0] ?? null;
 
@@ -55,7 +80,7 @@ export async function getData(path: string[], request: Request): Promise<any> {
     const grade = query.get('grade_class');
     const params: unknown[] = [school];
     let where = 's.school_id=$1 AND s.is_active=TRUE';
-    if (['therapist', 'psychologist'].includes(role)) {
+    if (['therapist', 'psychologist', 'psychiatrist'].includes(role)) {
       where += ' AND EXISTS (SELECT 1 FROM staff_student_assignments a WHERE a.student_id=s.id AND a.staff_user_id=$2 AND a.school_id=$1 AND a.is_active=TRUE)';
       params.push(actor.id);
     }
@@ -99,6 +124,7 @@ export async function getData(path: string[], request: Request): Promise<any> {
   }
 
   if (path[0] === 'attendance' && path.length === 1) {
+    assertDateRange(query.get('from_date'), query.get('to_date'));
     if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to view school attendance');
     const values: unknown[] = [school];
     const dateClauses: string[] = [];
@@ -127,8 +153,18 @@ export async function getData(path: string[], request: Request): Promise<any> {
     if (section === 'parent-interactions') return rows(`SELECT i.*,g.full_name AS guardian_name,u.full_name AS recorded_by_name FROM parent_interactions i LEFT JOIN users g ON g.id=i.guardian_user_id LEFT JOIN users u ON u.id=i.recorded_by_user_id WHERE i.student_id=$1 AND i.school_id=$2 AND ($3=FALSE OR i.guardian_user_id=$4) ORDER BY i.interaction_date DESC`, [id,school,guardianOnly,actor.id]);
     if (section === 'assessments') return rows(`SELECT a.*,u.full_name AS assessor_name FROM assessment_records a LEFT JOIN users u ON u.id=a.assessor_user_id WHERE a.student_id=$1 AND a.school_id=$2 AND ($3=FALSE OR a.guardian_visible=TRUE) ORDER BY a.assessment_date DESC`, [id,school,guardianOnly]);
     if (section === 'attendance') {
-      if (path[3] === 'summary') return one(`SELECT $1::uuid AS student_id,COUNT(*)::int AS total_days,COUNT(*) FILTER (WHERE status='present')::int AS present,COUNT(*) FILTER (WHERE status='absent')::int AS absent,COUNT(*) FILTER (WHERE status='leave')::int AS leave,COUNT(*) FILTER (WHERE status='other')::int AS other,CASE WHEN COUNT(*)=0 THEN 0 ELSE ROUND(COUNT(*) FILTER (WHERE status='present')::numeric/COUNT(*)*100,1) END AS attendance_pct FROM attendance_records WHERE student_id=$1 AND school_id=$2`, [id,school]);
-      return rows(`SELECT a.*,u.full_name AS recorded_by_name FROM attendance_records a LEFT JOIN users u ON u.id=a.recorded_by_user_id WHERE a.student_id=$1 AND a.school_id=$2 ORDER BY a.attendance_date DESC`, [id,school]);
+      if (path[3] === 'summary') {
+        assertDateRange(query.get('from_date'), query.get('to_date'));
+        const summaryValues: unknown[] = [id, school]; const summaryClauses: string[] = [];
+        if (query.get('from_date')) { summaryValues.push(query.get('from_date')); summaryClauses.push(`attendance_date >= $${summaryValues.length}`); }
+        if (query.get('to_date')) { summaryValues.push(query.get('to_date')); summaryClauses.push(`attendance_date <= $${summaryValues.length}`); }
+        return one(`SELECT $1::uuid AS student_id,COUNT(*)::int AS total_days,COUNT(*) FILTER (WHERE status='present')::int AS present,COUNT(*) FILTER (WHERE status='absent')::int AS absent,COUNT(*) FILTER (WHERE status='leave')::int AS leave,COUNT(*) FILTER (WHERE status='other')::int AS other,CASE WHEN COUNT(*)=0 THEN 0 ELSE ROUND(COUNT(*) FILTER (WHERE status='present')::numeric/COUNT(*)*100,1) END AS attendance_pct FROM attendance_records WHERE student_id=$1 AND school_id=$2${summaryClauses.length ? ` AND ${summaryClauses.join(' AND ')}` : ''}`, summaryValues);
+      }
+      assertDateRange(query.get('from_date'), query.get('to_date'));
+      const dateClauses: string[] = []; const dateValues: unknown[] = [id, school];
+      if (query.get('from_date')) { dateValues.push(query.get('from_date')); dateClauses.push(`a.attendance_date >= $${dateValues.length}`); }
+      if (query.get('to_date')) { dateValues.push(query.get('to_date')); dateClauses.push(`a.attendance_date <= $${dateValues.length}`); }
+      return rows(`SELECT a.*,u.full_name AS recorded_by_name FROM attendance_records a LEFT JOIN users u ON u.id=a.recorded_by_user_id WHERE a.student_id=$1 AND a.school_id=$2${dateClauses.length ? ` AND ${dateClauses.join(' AND ')}` : ''} ORDER BY a.attendance_date DESC`, dateValues);
     }
     if (section === 'iep-reviews') return rows(`SELECT r.*,COALESCE((SELECT json_agg(json_build_object('id',a.id,'iep_review_id',a.iep_review_id,'approver_user_id',a.approver_user_id,'approver_name',u.full_name,'required_role',a.required_role,'status',a.status,'comment',a.comment,'decision_at',a.decision_at,'created_at',a.created_at)) FROM iep_approvals a LEFT JOIN users u ON u.id=a.approver_user_id WHERE a.iep_review_id=r.id),'[]') AS approvals FROM iep_reviews r WHERE r.student_id=$1 AND r.school_id=$2 ORDER BY r.scheduled_date DESC`, [id,school]);
   }
@@ -181,29 +217,35 @@ export async function postData(path: string[], body: Record<string, any>) {
   };
   if (path[0] === 'students' && id && path[2] === 'plop') {
     if (!['academic','communication','social_skills','behaviour','motor_skills','cognitive_skills','adl','emotional_development','vocational_skills'].includes(body.domain)) fail(400,'Invalid PLOP domain');
+    assertDate(body.assessed_at, 'Assessment date');
     if (!['special_educator','psychologist','therapist'].includes(role)) fail(403,'Not authorized to create PLOP records');
     await studentAccess(actor,id,true);
     return insert('present_level_records',['school_id','student_id','domain','current_performance','assessment_method','baseline_value','remarks','assessed_by_user_id','assessed_at','guardian_visible'],[school,id,body.domain,body.current_performance,body.assessment_method,body.baseline_value??null,body.remarks??null,actor.id,body.assessed_at,body.guardian_visible??true]);
   }
   if (path[0] === 'students' && id && path[2] === 'therapy-sessions') {
     if (!['speech_therapy','occupational_therapy','physiotherapy','behaviour_therapy','counselling','other'].includes(body.therapy_type)) fail(400,'Invalid therapy type');
+    assertDate(body.session_date, 'Session date'); assertDuration(body.duration_minutes);
     if (role !== 'therapist') fail(403,'Only therapists can record therapy sessions');
     await studentAccess(actor,id,true);
     return insert('therapy_sessions',['school_id','student_id','goal_id','therapy_type','therapist_user_id','session_date','duration_minutes','progress_notes','outcome','next_steps','guardian_visible'],[school,id,body.goal_id??null,body.therapy_type,actor.id,body.session_date,body.duration_minutes,body.progress_notes,body.outcome??null,body.next_steps??null,body.guardian_visible??true]);
   }
   if (path[0] === 'students' && id && path[2] === 'accommodations') {
     if (!['classroom','examination','learning_materials','communication','mobility'].includes(body.area)) fail(400,'Invalid accommodation area');
+    assertDateRange(body.effective_from, body.effective_to, 'Accommodation date range', true);
     if (role !== 'special_educator') fail(403,'Only special educators can create accommodations');
     await studentAccess(actor,id,true);
-    return insert('accommodations',['school_id','student_id','area','accommodation','modification','assistive_technology','responsible_staff_user_id','effective_from','effective_to','is_active'],[school,id,body.area,body.accommodation,body.modification??null,body.assistive_technology??null,body.responsible_staff_user_id??actor.id,body.effective_from,body.effective_to??null,body.is_active??true]);
+    return insert('accommodations',['school_id','student_id','area','accommodation','modification','assistive_technology','responsible_staff_user_id','effective_from','effective_to','is_active'],[school,id,body.area,body.accommodation,body.modification??null,body.assistive_technology??null,body.responsible_staff_user_id??actor.id,body.effective_from,body.effective_to || null,body.is_active??true]);
   }
   if (path[0] === 'students' && id && path[2] === 'assessments') {
-    if (!['special_educator','psychologist','school_head'].includes(role)) fail(403,'Not authorized to create assessments');
+    assertDate(body.assessment_date, 'Assessment date');
+    if (body.next_review_date) { assertDate(body.next_review_date, 'Next review date', true); if (body.next_review_date < body.assessment_date) fail(400, 'Next review date cannot be before the assessment date'); }
+    if (!['special_educator','psychologist','psychiatrist','therapist','school_head'].includes(role)) fail(403,'Not authorized to create assessments');
     await studentAccess(actor,id,true);
-    return insert('assessment_records',['school_id','student_id','assessment_type','domain','assessment_date','assessor_user_id','summary','recommendations','guardian_visible','next_review_date'],[school,id,body.assessment_type,body.domain??null,body.assessment_date,actor.id,body.summary,body.recommendations??null,body.guardian_visible??false,body.next_review_date??null]);
+    return insert('assessment_records',['school_id','student_id','assessment_type','domain','assessment_date','assessor_user_id','summary','recommendations','guardian_visible','next_review_date'],[school,id,body.assessment_type,body.domain??null,body.assessment_date,actor.id,body.summary,body.recommendations??null,body.guardian_visible??false,body.next_review_date || null]);
   }
   if (path[0] === 'attendance' && path.length === 1) {
     if (!['present','absent','leave','other'].includes(body.status)) fail(400,'Invalid attendance status');
+    assertDate(body.attendance_date, 'Attendance date');
     if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to record attendance');
     if (typeof body.student_id !== 'string') fail(400,'A student must be selected');
     await studentAccess(actor,body.student_id,true);
@@ -211,12 +253,14 @@ export async function postData(path: string[], body: Record<string, any>) {
   }
   if (path[0] === 'students' && id && path[2] === 'attendance') {
     if (!['present','absent','leave','other'].includes(body.status)) fail(400,'Invalid attendance status');
+    assertDate(body.attendance_date, 'Attendance date');
     if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to record attendance');
     await studentAccess(actor,id,true);
     return insert('attendance_records',['school_id','student_id','attendance_date','status','reason','recorded_by_user_id'],[school,id,body.attendance_date,body.status,body.reason??null,actor.id]);
   }
   if (path[0] === 'students' && id && path[2] === 'iep-plans') {
     if (!['special_educator','school_head'].includes(role)) fail(403,'Not authorized to create IEP plans');
+    assertDateRange(body.start_date, body.end_date, 'IEP date range', true);
     await studentAccess(actor,id,true);
     return insert('iep_plans',['school_id','student_id','academic_year','start_date','end_date','status','version','created_by_user_id'],[school,id,body.academic_year,body.start_date,body.end_date,body.status??'draft',1,actor.id]);
   }
@@ -229,6 +273,7 @@ export async function postData(path: string[], body: Record<string, any>) {
   }
   if (path[0] === 'goals' && id && path[2] === 'progress-entries') {
     if (!['baseline','term_1','term_2','term_3','final'].includes(body.term) || !Number.isInteger(body.rating) || body.rating < 0 || body.rating > 4) fail(400,'Invalid progress term or rating (rating must be 0–4)');
+    assertDate(body.observed_at, 'Observation date');
     if (!['special_educator','therapist','psychologist'].includes(role)) fail(403,'Not authorized to record progress');
     const goal = await one('SELECT student_id FROM iep_goals WHERE id=$1 AND school_id=$2',[id,school]);
     if (!goal) fail(404,'Goal not found');
@@ -258,13 +303,19 @@ export async function postData(path: string[], body: Record<string, any>) {
   }
   if (path[0] === 'students' && id && path[2] === 'parent-interactions') {
     if (!['meeting','call','email','other'].includes(body.mode)) fail(400,'Invalid interaction mode');
+    assertDate(body.interaction_date, 'Interaction date');
     if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to create parent interactions');
     await studentAccess(actor,id,true);
     if (body.guardian_user_id) {
       const linked = await db.query('SELECT 1 FROM guardian_student_links WHERE guardian_user_id=$1 AND student_id=$2 AND school_id=$3 AND is_active=TRUE',[body.guardian_user_id,id,school]);
       if (!linked.rowCount) fail(400,'Selected guardian is not linked to this student');
     }
-    return insert('parent_interactions',['school_id','student_id','guardian_user_id','recorded_by_user_id','interaction_date','mode','discussion_points','action_taken','acknowledgement_status'],[school,id,body.guardian_user_id??null,actor.id,body.interaction_date,body.mode,body.discussion_points,body.action_taken,body.acknowledgement_status??'pending']);
+    let guardianId = body.guardian_user_id ?? null;
+    if (!guardianId) {
+      const linkedGuardian = await one('SELECT guardian_user_id FROM guardian_student_links WHERE student_id=$1 AND school_id=$2 AND is_active=TRUE ORDER BY is_primary DESC,created_at LIMIT 1',[id,school]);
+      guardianId = linkedGuardian?.guardian_user_id ?? null;
+    }
+    return insert('parent_interactions',['school_id','student_id','guardian_user_id','recorded_by_user_id','interaction_date','mode','discussion_points','action_taken','acknowledgement_status'],[school,id,guardianId,actor.id,body.interaction_date,body.mode,body.discussion_points,body.action_taken,body.acknowledgement_status??'pending']);
   }
   if (path[0] === 'parent-interactions' && id && path[2] === 'acknowledge') {
     if (role !== 'guardian') fail(403,'Guardian role required');
@@ -288,23 +339,45 @@ export async function patchData(path: string[], body: Record<string, any>) {
     'therapy-sessions': { table: 'therapy_sessions', roles: ['therapist'], fields: ['goal_id','therapy_type','session_date','duration_minutes','progress_notes','outcome','next_steps','guardian_visible'], studentColumn: 'student_id', ownerColumn: 'therapist_user_id' },
     accommodations: { table: 'accommodations', roles: ['special_educator'], fields: ['area','accommodation','modification','assistive_technology','responsible_staff_user_id','effective_from','effective_to','is_active'], studentColumn: 'student_id' },
     'parent-interactions': { table: 'parent_interactions', roles: ['special_educator','school_head','school_admin'], fields: ['guardian_user_id','interaction_date','mode','discussion_points','action_taken','acknowledgement_status'], studentColumn: 'student_id' },
-    assessments: { table: 'assessment_records', roles: ['special_educator','psychologist','psychiatrist','school_head'], fields: ['assessment_type','domain','assessment_date','external_assessor_name','summary','recommendations','guardian_visible','next_review_date'], studentColumn: 'student_id' },
+    assessments: { table: 'assessment_records', roles: ['special_educator','psychologist','psychiatrist','therapist','school_head'], fields: ['assessment_type','domain','assessment_date','external_assessor_name','summary','recommendations','guardian_visible','next_review_date'], studentColumn: 'student_id' },
     attendance: { table: 'attendance_records', roles: ['special_educator','school_head','school_admin'], fields: ['attendance_date','status','reason'], studentColumn: 'student_id' },
     'iep-reviews': { table: 'iep_reviews', roles: ['special_educator','school_head'], fields: ['review_type','scheduled_date','conducted_at','review_notes','status'], studentColumn: 'student_id' },
     students: { table: 'students', roles: ['special_educator','school_head','school_admin'], fields: ['full_name','date_of_birth','gender','disability_category','enrollment_date','grade_class','diagnosis','strengths','areas_of_need','learning_style','languages_known','assistive_devices','is_active'] },
   };
   const kind = path[0];
+  if (kind === 'profile' && path.length === 1) {
+    if (typeof body.phone !== 'string' || body.phone.trim().length < 7 || body.phone.trim().length > 32 || !/^[+0-9() .-]+$/.test(body.phone.trim())) fail(400, 'Enter a valid phone number (7–32 characters)');
+    const updated = await one('UPDATE users SET phone=$1,updated_at=NOW() WHERE id=$2 RETURNING phone', [body.phone.trim(), actor.id]);
+    return updated;
+  }
   const spec = definitions[kind];
   if (!spec) fail(404,'API endpoint not found');
   if (!spec.roles.includes(role)) fail(403,'Not authorized to update this record');
   const current = await one(`SELECT * FROM ${spec.table} WHERE id=$1 AND school_id=$2`,[id,school]);
   if (!current) fail(404,'Record not found');
-  if (kind === 'students') await studentAccess(actor,id,true);
-  else if (spec.studentColumn) await studentAccess(actor,current[spec.studentColumn],true);
+  if (kind === 'students') {
+    if (body.date_of_birth) assertDate(body.date_of_birth, 'Date of birth');
+    if (body.enrollment_date) assertDate(body.enrollment_date, 'Enrollment date');
+    const dob = body.date_of_birth ?? String(current.date_of_birth).slice(0,10);
+    const enrolled = body.enrollment_date ?? String(current.enrollment_date).slice(0,10);
+    if (dob && enrolled && dob > enrolled) fail(400, 'Date of birth cannot be after the enrollment date');
+    await studentAccess(actor,id,true);
+  }
+  const dateFields: Record<string, string[]> = {
+    'therapy-sessions': ['session_date'], attendance: ['attendance_date'], 'parent-interactions': ['interaction_date'],
+    plop: ['assessed_at'], assessments: ['assessment_date'], 'iep-reviews': ['conducted_at'],
+  };
+  for (const field of dateFields[kind] ?? []) if (body[field]) assertDate(body[field], field.replaceAll('_',' '));
+  if (kind === 'therapy-sessions' && body.duration_minutes !== undefined) assertDuration(body.duration_minutes);
+  if (kind === 'accommodations') assertDateRange(body.effective_from ?? String(current.effective_from).slice(0,10), body.effective_to ?? (current.effective_to ? String(current.effective_to).slice(0,10) : null), 'Accommodation date range', true);
+  if (kind === 'iep-plans') assertDateRange(body.start_date ?? String(current.start_date).slice(0,10), body.end_date ?? String(current.end_date).slice(0,10), 'IEP date range', true);
+  if (kind === 'assessments' && body.next_review_date && current.assessment_date && body.next_review_date < String(body.assessment_date).slice(0,10)) fail(400, 'Next review date cannot be before the assessment date');
+  if (kind !== 'students' && spec.studentColumn) await studentAccess(actor,current[spec.studentColumn],true);
   if (spec.ownerColumn && current[spec.ownerColumn] !== actor.id) fail(403,'You can only update your own records');
   const keys = Object.keys(body).filter(key => spec.fields.includes(key));
   if (!keys.length) fail(400,'No supported fields were supplied');
-  const values = keys.map(key => body[key]);
+  const nullableDateFields = new Set(['effective_to', 'next_review_date', 'conducted_at']);
+  const values = keys.map(key => nullableDateFields.has(key) && body[key] === '' ? null : body[key]);
   const assignments = keys.map((key,index) => `${key}=$${index+1}`).join(',');
   values.push(id,school);
   const touchUpdated = !['present_level_records','attendance_records'].includes(spec.table);
@@ -316,6 +389,7 @@ export async function exportWorkbook(body: Record<string, any>) {
   const actor = await requireActor();
   const role = actor.active_role;
   const school = actor.active_school_id;
+  assertDateRange(body.from_date, body.to_date, 'Export date range');
   let permitted: string[];
   if (role === 'guardian') {
     permitted = (await rows('SELECT student_id FROM guardian_student_links WHERE guardian_user_id=$1 AND school_id=$2 AND is_active=TRUE',[actor.id,school])).map(r => r.student_id);
@@ -336,7 +410,6 @@ export async function exportWorkbook(body: Record<string, any>) {
     if (body.to_date) { values.push(body.to_date); clauses.push(`${column} <= $${firstIndex + values.length - 3}`); }
     return { sql: clauses.length ? ` AND ${clauses.join(' AND ')}` : '', values };
   }
-  const params: unknown[] = [school, requested];
   const terms = Array.isArray(body.terms) && body.terms.length ? body.terms : ['baseline','term_1','term_2','term_3','final'];
   const ExcelJS = (await import('exceljs')).default;
   const workbook = new ExcelJS.Workbook();
@@ -351,9 +424,11 @@ export async function exportWorkbook(body: Record<string, any>) {
     sheet.columns.forEach(column => { column.width = Math.min(48, Math.max(14, String(column.header ?? '').length + 4)); });
     return sheet;
   };
-  const students = await rows(`SELECT s.id,s.admission_number,s.full_name,s.date_of_birth,s.gender,s.disability_category,s.enrollment_date,s.grade_class,s.strengths,s.areas_of_need,s.learning_style,s.languages_known,s.assistive_devices,${includeDiagnosis ? 's.diagnosis' : 'NULL::text AS diagnosis'},${includeGuardian ? `(SELECT string_agg(u.full_name || ' (' || COALESCE(u.phone,u.email) || ')', '; ') FROM guardian_student_links gl JOIN users u ON u.id=gl.guardian_user_id WHERE gl.student_id=s.id AND gl.is_active=TRUE)` : 'NULL::text'} AS guardian_contact FROM students s WHERE s.school_id=$1 AND s.id=ANY($2::uuid[]) ORDER BY s.full_name`,params.slice(0,2));
+  const studentFilter = datePredicate('s.enrollment_date',3);
+  const students = await rows(`SELECT s.id,s.admission_number,s.full_name,s.date_of_birth,s.gender,s.disability_category,s.enrollment_date,s.grade_class,s.strengths,s.areas_of_need,s.learning_style,s.languages_known,s.assistive_devices,${includeDiagnosis ? 's.diagnosis' : 'NULL::text AS diagnosis'},${includeGuardian ? `(SELECT string_agg(u.full_name || ' (' || COALESCE(u.phone,u.email) || ')', '; ') FROM guardian_student_links gl JOIN users u ON u.id=gl.guardian_user_id WHERE gl.student_id=s.id AND gl.is_active=TRUE)` : 'NULL::text'} AS guardian_contact FROM students s WHERE s.school_id=$1 AND s.id=ANY($2::uuid[])${studentFilter.sql} ORDER BY s.full_name`,studentFilter.values);
   addSheet('Student Database',['admission_number','full_name','date_of_birth','gender','disability_category','enrollment_date','grade_class','diagnosis','strengths','areas_of_need','learning_style','languages_known','assistive_devices','guardian_contact'],students);
-  const goals = await rows(`SELECT s.full_name AS student_name,p.academic_year,g.domain,g.annual_goal,g.teaching_strategies,g.timeline,g.evaluation_method,g.status,u.full_name AS responsible_staff FROM iep_goals g JOIN students s ON s.id=g.student_id JOIN iep_plans p ON p.id=g.iep_plan_id LEFT JOIN users u ON u.id=g.responsible_staff_user_id WHERE g.school_id=$1 AND g.student_id=ANY($2::uuid[]) ORDER BY s.full_name,g.created_at`,params.slice(0,2));
+  const goalFilter = datePredicate('g.created_at::date',3);
+  const goals = await rows(`SELECT s.full_name AS student_name,p.academic_year,g.domain,g.annual_goal,g.teaching_strategies,g.timeline,g.evaluation_method,g.status,u.full_name AS responsible_staff FROM iep_goals g JOIN students s ON s.id=g.student_id JOIN iep_plans p ON p.id=g.iep_plan_id LEFT JOIN users u ON u.id=g.responsible_staff_user_id WHERE g.school_id=$1 AND g.student_id=ANY($2::uuid[])${goalFilter.sql} ORDER BY s.full_name,g.created_at`,goalFilter.values);
   addSheet('IEP Goals',['student_name','academic_year','domain','annual_goal','teaching_strategies','timeline','evaluation_method','status','responsible_staff'],goals);
   const progressFilter = datePredicate('p.observed_at',4);
   const progress = await rows(`SELECT s.full_name AS student_name,g.domain,g.annual_goal,p.term,p.rating,p.observation,p.observed_at,u.full_name AS assessed_by FROM progress_entries p JOIN students s ON s.id=p.student_id JOIN iep_goals g ON g.id=p.goal_id LEFT JOIN users u ON u.id=p.assessed_by_user_id WHERE p.school_id=$1 AND p.student_id=ANY($2::uuid[]) AND p.term=ANY($3::text[])${progressFilter.sql} ORDER BY s.full_name,p.observed_at`,[school,requested,terms,...progressFilter.values.slice(2)]);
@@ -370,7 +445,7 @@ export async function exportWorkbook(body: Record<string, any>) {
   const assessmentFilter = datePredicate('a.assessment_date',4);
   const assessments = await rows(`SELECT s.full_name AS student_name,a.assessment_type,a.domain,a.assessment_date,a.summary,a.recommendations,a.guardian_visible,u.full_name AS assessor FROM assessment_records a JOIN students s ON s.id=a.student_id LEFT JOIN users u ON u.id=a.assessor_user_id WHERE a.school_id=$1 AND a.student_id=ANY($2::uuid[]) AND ($3=FALSE OR a.guardian_visible=TRUE)${assessmentFilter.sql} ORDER BY a.assessment_date`,[school,requested,role==='guardian',...assessmentFilter.values.slice(2)]);
   addSheet('Assessment Reports',['student_name','assessment_type','domain','assessment_date','summary','recommendations','guardian_visible','assessor'],assessments);
-  const reportCards = await rows(`SELECT s.full_name AS student_name,s.grade_class,s.disability_category,p.academic_year,COUNT(g.id)::int AS total_goals,COUNT(g.id) FILTER (WHERE g.status='achieved')::int AS achieved_goals,CASE WHEN COUNT(g.id)=0 THEN 0 ELSE ROUND(COUNT(g.id) FILTER (WHERE g.status='achieved')::numeric/COUNT(g.id)*100,1) END AS attainment_pct FROM students s LEFT JOIN iep_plans p ON p.student_id=s.id AND p.status IN ('active','approved') LEFT JOIN iep_goals g ON g.iep_plan_id=p.id WHERE s.school_id=$1 AND s.id=ANY($2::uuid[]) GROUP BY s.id,p.id ORDER BY s.full_name`,params.slice(0,2));
+  const reportCards = await rows(`SELECT s.full_name AS student_name,s.grade_class,s.disability_category,p.academic_year,COUNT(g.id)::int AS total_goals,COUNT(g.id) FILTER (WHERE g.status='achieved')::int AS achieved_goals,CASE WHEN COUNT(g.id)=0 THEN 0 ELSE ROUND(COUNT(g.id) FILTER (WHERE g.status='achieved')::numeric/COUNT(g.id)*100,1) END AS attainment_pct FROM students s LEFT JOIN iep_plans p ON p.student_id=s.id AND p.status IN ('active','approved') LEFT JOIN iep_goals g ON g.iep_plan_id=p.id AND ($3::date IS NULL OR g.created_at::date >= $3::date) AND ($4::date IS NULL OR g.created_at::date <= $4::date) WHERE s.school_id=$1 AND s.id=ANY($2::uuid[]) GROUP BY s.id,p.id ORDER BY s.full_name`,[school,requested,body.from_date || null,body.to_date || null]);
   addSheet('Automated Report Cards',['student_name','grade_class','disability_category','academic_year','total_goals','achieved_goals','attainment_pct'],reportCards);
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }

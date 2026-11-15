@@ -50,7 +50,7 @@ function ChildCard({ child, featured = false }: { child: GuardianChildCard; feat
             <Avatar name={child.full_name} imageUrl={child.profile_image_path} size="2xl" />
             <div className="mt-5 min-w-0">
               <p className="font-display text-[32px] leading-tight text-ink sm:text-[40px]">{child.full_name}</p>
-              <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-ash-gray">·</span> {child.grade_class || 'Class not recorded'}</p>
+              <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-muted-text">·</span> {child.grade_class || 'Class not recorded'}</p>
               <p className="mt-1 text-xs text-graphite">{child.relationship_label || 'Your child'}</p>
             </div>
             <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink px-5 py-2.5 text-xs font-medium text-ink transition-colors group-hover:border-signal-orange group-hover:bg-signal-orange group-hover:text-white">
@@ -69,10 +69,10 @@ function ChildCard({ child, featured = false }: { child: GuardianChildCard; feat
     <button onClick={open} className="group flex min-h-[470px] w-full flex-col items-center rounded-lg border border-ink/80 bg-gallery-white p-7 text-center transition-colors hover:border-signal-orange focus-visible:outline-none sm:p-8" aria-label={`Open ${child.full_name}'s profile`}>
       <Avatar name={child.full_name} imageUrl={child.profile_image_path} size="2xl" />
       <p className="mt-6 font-display text-[30px] leading-tight text-ink">{child.full_name}</p>
-      <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-ash-gray">·</span> {child.grade_class || 'Class not recorded'}</p>
+      <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-muted-text">·</span> {child.grade_class || 'Class not recorded'}</p>
       <p className="mt-1 text-xs text-graphite">{child.relationship_label || 'Your child'}</p>
       <div className="mt-8 w-full border-t border-dashed border-ink/50 pt-6 text-left"><ChildFacts child={child} /></div>
-      <span className="mt-auto inline-flex items-center gap-2 pt-7 text-xs font-medium text-ink transition-colors group-hover:text-signal-orange">View child profile <ChevronRight size={15} /></span>
+      <span className="mt-auto inline-flex items-center gap-2 pt-7 text-xs font-medium text-ink transition-colors group-hover:text-charcoal-warm">View child profile <ChevronRight size={15} /></span>
     </button>
   );
 }
@@ -86,7 +86,7 @@ export default function GuardianDashboard() {
   return (
     <PageShell>
       <section className="mb-8 flex flex-col gap-3 sm:mb-10">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-signal-orange">Family workspace</p>
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-charcoal-warm">Family workspace</p>
         <h1 className="font-display text-[42px] leading-[1.02] text-ink sm:text-[54px]">Your child{children && children.length > 1 ? 'ren' : ''}</h1>
         <p className="max-w-2xl text-sm leading-relaxed text-graphite sm:text-base">Choose a child to open their learning and support profile.</p>
       </section>
