@@ -30,7 +30,9 @@ export function Link({ to, children, ...props }: Omit<React.AnchorHTMLAttributes
 
 export function NavLink({ to, children, className, ...props }: Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'className'> & { to: string; children: React.ReactNode; className?: string | ((state: { isActive: boolean }) => string) }) {
   const pathname = usePathname();
-  const isActive = pathname === to || (to !== '/' && pathname.startsWith(`${to}/`));
+  // Guardian profile is exposed at /guardian/profile but shares the /profile nav item.
+  const activePath = pathname === '/guardian/profile' ? '/profile' : pathname;
+  const isActive = activePath === to || (to !== '/' && activePath.startsWith(`${to}/`));
   const resolved = typeof className === 'function' ? className({ isActive }) : className;
   return <NextLink href={to} className={resolved} aria-current={isActive ? 'page' : undefined} {...props}>{children}</NextLink>;
 }
