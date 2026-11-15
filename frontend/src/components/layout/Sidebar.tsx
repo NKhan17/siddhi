@@ -65,7 +65,7 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
     <aside
       className={mobile
         ? 'flex h-full w-[min(290px,86vw)] flex-col border-r border-ink/15 bg-warm-parchment'
-        : 'hidden h-screen w-[76px] shrink-0 flex-col border-r border-ink/15 bg-warm-parchment md:sticky md:top-0 md:flex xl:w-[280px]'}
+        : 'workspace-sidebar hidden h-screen w-[76px] shrink-0 flex-col border-r border-ink/15 bg-warm-parchment md:sticky md:top-0 md:flex xl:w-[280px]'}
       aria-label="Main navigation"
     >
       <div className={`flex h-[72px] shrink-0 items-center border-b border-ink/15 ${mobile ? 'justify-between px-5' : 'justify-center xl:justify-start xl:px-5'}`}>

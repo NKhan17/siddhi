@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Menu, LogOut, ChevronDown, ArrowLeft, Download } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../app/AuthContext';
 import { api } from '../../lib/api';
 import { Sidebar } from './Sidebar';
 import { initials } from '../../lib/utils';
+import { withViewTransition } from '../../lib/navigation';
 
 interface PageShellProps { children: React.ReactNode }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
@@ -24,11 +25,37 @@ export function PageShell({ children }: PageShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const lastPathname = useRef(pathname);
+  const historyBackPending = useRef(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const pageTitle = sectionNames.find(([pattern]) => pattern.test(pathname))?.[1] ?? 'Workspace';
 
-  // The catch-all App Router page keeps the same route segment; reset the content scroll explicitly.
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  // The catch-all App Router page keeps the same route segment; reset content scroll explicitly.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (lastPathname.current !== pathname) {
+      if (historyBackPending.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const page = document.querySelector<HTMLElement>('.workspace-page');
+        page?.animate(
+          [{ opacity: 0.82, transform: 'translateX(-18px)' }, { opacity: 1, transform: 'translateX(0)' }],
+          { duration: 220, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+      }
+      historyBackPending.current = false;
+      lastPathname.current = pathname;
+    }
+  }, [pathname]);
+
+  // Let the browser own edge-swipe gestures. If it doesn't supply a visual transition,
+  // animate the newly revealed route once the history traversal has committed.
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
+      historyBackPending.current = !hasBrowserTransition && window.location.pathname !== lastPathname.current;
+    };
+    window.addEventListener('popstate', handlePopState, true);
+    return () => window.removeEventListener('popstate', handlePopState, true);
+  }, []);
 
   useEffect(() => {
     const handleInstallPrompt = (event: Event) => {
@@ -86,15 +113,15 @@ export function PageShell({ children }: PageShellProps) {
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-ink/15 bg-warm-parchment/95 px-4 backdrop-blur-sm sm:px-7 lg:px-9">
+        <header className="workspace-header sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 border-b border-ink/15 bg-warm-parchment/95 px-4 backdrop-blur-sm sm:px-7 lg:px-9">
           <div className="flex min-w-0 items-center gap-2">
             <button
               onClick={() => {
                 const fallback = pathname.startsWith('/students/') ? `/students/${pathname.split('/')[2]}` : user?.active_role === 'guardian' ? '/guardian' : '/staff';
-                if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) router.back();
-                else router.push(fallback);
+                if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) withViewTransition(() => router.back(), 'back');
+                else withViewTransition(() => router.push(fallback), 'back');
               }}
-              className="rounded-full border border-ink/20 p-2 text-ink transition-colors hover:bg-gallery-white"
+              className="hidden rounded-full border border-ink/20 p-2 text-ink transition-colors hover:bg-gallery-white md:inline-flex"
               aria-label="Go back"
               title="Go back"
             ><ArrowLeft size={17} /></button>
@@ -124,7 +151,7 @@ export function PageShell({ children }: PageShellProps) {
                   <ChevronDown size={13} />
                 </label>
               )}
-              <button onClick={() => router.push('/profile')} className="flex items-center gap-2 rounded-full p-1.5 pr-2 text-left transition-colors hover:bg-gallery-white" aria-label="Open my profile">
+              <button onClick={() => withViewTransition(() => router.push('/profile'), 'forward')} className="flex items-center gap-2 rounded-full p-1.5 pr-2 text-left transition-colors hover:bg-gallery-white" aria-label="Open my profile">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 bg-soft-linen text-xs font-medium text-ink">{initials(user.full_name)}</span>
                 <span className="hidden max-w-[155px] sm:block">
                   <span className="block truncate text-xs font-medium text-ink">{user.full_name}</span>
@@ -135,7 +162,7 @@ export function PageShell({ children }: PageShellProps) {
             </div>
           )}
         </header>
-        <main className="w-full flex-1 px-4 py-7 sm:px-7 sm:py-9 lg:px-10">
+        <main className="workspace-page w-full flex-1 px-4 py-7 sm:px-7 sm:py-9 lg:px-10">
           <div className="mx-auto w-full max-w-[1200px]">{children}</div>
         </main>
       </div>
