@@ -27,6 +27,9 @@ export function PageShell({ children }: PageShellProps) {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const pageTitle = sectionNames.find(([pattern]) => pattern.test(pathname))?.[1] ?? 'Workspace';
 
+  // The catch-all App Router page keeps the same route segment; reset the content scroll explicitly.
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+
   useEffect(() => {
     const handleInstallPrompt = (event: Event) => {
       event.preventDefault();

@@ -93,8 +93,8 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
             title={item.label}
             aria-label={item.label}
             className={({ isActive }) => mobile
-              ? `flex min-h-11 w-full min-w-0 items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${isActive ? 'bg-ink text-white' : 'text-graphite hover:bg-soft-linen'}`
-              : `group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors xl:h-11 xl:w-full xl:min-w-0 xl:justify-start xl:gap-3 xl:px-4 ${isActive ? 'border-ink bg-ink text-white' : 'border-transparent text-graphite hover:border-pale-stone hover:bg-gallery-white'}`}
+              ? `flex min-h-11 w-full min-w-0 items-center gap-3 rounded-lg px-5 py-3 text-sm transition-colors ${isActive ? 'bg-ink text-white' : 'text-graphite hover:bg-soft-linen'}`
+              : `group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors xl:h-11 xl:w-full xl:min-w-0 xl:justify-start xl:gap-3 xl:px-5 ${isActive ? 'border-ink bg-ink text-white' : 'border-transparent text-graphite hover:border-pale-stone hover:bg-gallery-white'}`}
           >
             <span className="flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">{item.icon}</span>
             <span className={mobile ? 'block min-w-0 flex-1 whitespace-nowrap' : 'hidden min-w-0 flex-1 whitespace-nowrap xl:block'}>{item.label}</span>
