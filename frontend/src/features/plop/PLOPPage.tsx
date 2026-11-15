@@ -8,7 +8,6 @@ import { Plus } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { PLOPRecord } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Textarea, Select } from '../../components/ui';
 import { formatDate, PLOP_DOMAIN_LABELS, todayISODate } from '../../lib/utils';
 
@@ -66,7 +65,7 @@ export default function PLOPPage() {
   }
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Present Level of Performance (PLOP)"
@@ -169,6 +168,6 @@ export default function PLOPPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

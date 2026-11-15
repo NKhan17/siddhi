@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from '../../lib/navigation';
 import { Search } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { StudentListResponse } from '../../types';
-import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, LoadingState, ErrorState, EmptyState, Button, Input } from '../../components/ui';
 import { ageFromDob } from '../../lib/utils';
 import { useAuth } from '../../app/AuthContext';
@@ -32,7 +31,7 @@ export default function StudentsListPage() {
   });
 
   return (
-    <PageShell>
+    <>
       <PageHeader title={gradeClass ? `Students · ${gradeClass}` : "Students"} subtitle={isAssignedRole ? "All students assigned to you" : gradeClass ? `Students in ${gradeClass}` : "All students in your school"} actions={gradeClass ? <Button variant="outline" size="sm" onClick={() => navigate('/students')}>Clear class filter</Button> : undefined} />
 
       {/* Search */}
@@ -120,6 +119,6 @@ export default function StudentsListPage() {
           )}
         </>
       )}
-    </PageShell>
+    </>
   );
 }

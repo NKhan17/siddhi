@@ -3,7 +3,6 @@ import { useNavigate } from '../../lib/navigation';
 import { api } from '../../lib/api';
 import type { ReportsSummary } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import { Card, LoadingState, ErrorState, StatusBadge } from '../../components/ui';
 import { Users, BookOpen, TrendingUp, ClipboardCheck } from 'lucide-react';
 
@@ -28,7 +27,7 @@ export default function StaffDashboard() {
   }, {})).sort((a, b) => a.grade_class.localeCompare(b.grade_class, undefined, { numeric: true }));
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-5xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-medium text-ink-black tracking-tight">{greeting}</h1>
@@ -109,6 +108,6 @@ export default function StaffDashboard() {
           </>
         )}
       </div>
-    </PageShell>
+    </>
   );
 }

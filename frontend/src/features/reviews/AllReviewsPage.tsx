@@ -3,7 +3,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { Link } from '../../lib/navigation';
-import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, StatusBadge } from '../../components/ui';
 import { formatDate } from '../../lib/utils';
 
@@ -17,7 +16,7 @@ export default function AllReviewsPage() {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<Review[]>({ queryKey: ['school-reviews'], queryFn: () => api.get('/reviews') });
   return (
-    <PageShell>
+    <>
       <div className="mx-auto max-w-5xl">
         <PageHeader title="IEP Reviews & Approvals" subtitle="Review schedule and approval status across your students" />
         {isLoading && <LoadingState />}
@@ -45,6 +44,6 @@ export default function AllReviewsPage() {
           })}
         </div>
       </div>
-    </PageShell>
+    </>
   );
 }

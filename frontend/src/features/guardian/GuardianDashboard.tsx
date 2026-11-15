@@ -52,7 +52,7 @@ function ChildCard({ child, featured = false }: { child: GuardianChildCard; feat
               <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-muted-text">·</span> {child.grade_class || 'Class not recorded'}</p>
               <p className="mt-1 text-xs text-graphite">{child.relationship_label || 'Your child'}</p>
             </div>
-            <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink px-5 py-2.5 text-xs font-medium text-ink transition-colors group-hover:border-signal-orange group-hover:bg-signal-orange group-hover:text-white">
+            <span className="mt-6 inline-flex min-h-11 min-w-[11rem] shrink-0 items-center justify-center gap-3 rounded-full border border-ink px-6 py-3 text-sm font-medium text-ink transition-colors group-hover:border-signal-orange group-hover:bg-signal-orange group-hover:text-white [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0">
               View child profile <ArrowUpRight size={15} />
             </span>
           </div>
@@ -71,7 +71,7 @@ function ChildCard({ child, featured = false }: { child: GuardianChildCard; feat
       <p className="mt-2 text-sm text-graphite">{age} years old <span className="px-1.5 text-muted-text">·</span> {child.grade_class || 'Class not recorded'}</p>
       <p className="mt-1 text-xs text-graphite">{child.relationship_label || 'Your child'}</p>
       <div className="mt-8 w-full border-t border-dashed border-ink/50 pt-6 text-left"><ChildFacts child={child} /></div>
-      <span className="mt-auto inline-flex items-center gap-2 pt-7 text-xs font-medium text-ink transition-colors group-hover:text-charcoal-warm">View child profile <ChevronRight size={15} /></span>
+      <span className="mt-auto inline-flex min-h-11 min-w-[11rem] shrink-0 items-center justify-center gap-3 rounded-full border border-ink px-6 py-3 text-sm font-medium text-ink transition-colors group-hover:border-signal-orange group-hover:bg-signal-orange group-hover:text-white [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0">View child profile <ChevronRight size={15} /></span>
     </button>
   );
 }

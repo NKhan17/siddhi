@@ -8,7 +8,6 @@ import { Plus } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { AttendanceRecord, AttendanceSummary } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Select, StatusBadge, DataTable
@@ -71,7 +70,7 @@ export default function AttendancePage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Attendance"
@@ -168,6 +167,6 @@ export default function AttendancePage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

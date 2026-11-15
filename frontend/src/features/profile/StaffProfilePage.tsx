@@ -2,7 +2,6 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { PageShell } from '../../components/layout/PageShell';
 import { Avatar, Card, Button, Field, Input } from '../../components/ui';
 import { useAuth } from '../../app/AuthContext';
 import { Mail, BadgeCheck, Building2, UserRound } from 'lucide-react';
@@ -28,7 +27,7 @@ export default function StaffProfilePage() {
 
   const memberships = user.memberships.filter((membership) => membership.school_id === user.active_school_id);
   return (
-    <PageShell>
+    <>
       <div className="mx-auto max-w-4xl space-y-7">
         <div><p className="text-[11px] font-medium uppercase tracking-[0.18em] text-charcoal-warm">Account</p><h1 className="mt-2 font-display text-[44px] leading-none text-ink sm:text-[58px]">My profile</h1><p className="mt-3 text-sm text-graphite">Your account information and current workspace details.</p></div>
         <Card className="!border-ink/80 !p-6 sm:!p-9">
@@ -58,6 +57,6 @@ export default function StaffProfilePage() {
           )) : <p className="text-sm text-graphite">No school membership details available.</p>}
         </Card>
       </div>
-    </PageShell>
+    </>
   );
 }

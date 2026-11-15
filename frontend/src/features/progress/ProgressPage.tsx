@@ -11,7 +11,6 @@ import {
 import { api } from '../../lib/api';
 import type { GoalProgressSummary } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge, RatingScale
@@ -173,7 +172,7 @@ export default function ProgressPage() {
   }
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Progress Monitoring"
@@ -233,6 +232,6 @@ export default function ProgressPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

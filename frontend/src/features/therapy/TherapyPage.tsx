@@ -8,7 +8,6 @@ import { Plus } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { TherapySession } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select
@@ -62,7 +61,7 @@ export default function TherapyPage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Therapy Tracker"
@@ -166,6 +165,6 @@ export default function TherapyPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

@@ -8,7 +8,6 @@ import { Plus, CheckCircle } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { ParentInteraction } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge
@@ -62,7 +61,7 @@ export default function CommunicationsPage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Parent Communication Log"
@@ -110,6 +109,7 @@ export default function CommunicationsPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="w-auto min-w-[9rem] shrink-0 px-5"
                     onClick={() => acknowledgeMutation.mutate(i.id)}
                     loading={acknowledgeMutation.isPending}
                   >
@@ -151,6 +151,6 @@ export default function CommunicationsPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

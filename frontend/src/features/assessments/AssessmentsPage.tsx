@@ -8,7 +8,6 @@ import { Plus } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { AssessmentRecord } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select
@@ -61,7 +60,7 @@ export default function AssessmentsPage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Assessment Records"
@@ -154,6 +153,6 @@ export default function AssessmentsPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

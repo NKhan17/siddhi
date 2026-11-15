@@ -8,7 +8,6 @@ import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { IEPReview, IEPPlan } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge
@@ -114,7 +113,7 @@ export default function ReviewsPage() {
   }
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="IEP Reviews & Approvals"
@@ -242,6 +241,6 @@ export default function ReviewsPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

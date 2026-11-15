@@ -4,7 +4,6 @@ import { Download, FileText } from 'lucide-react';
 import { api, downloadBlob } from '../../lib/api';
 import type { ReportsSummary } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, Button, Modal,
   Field, Input
@@ -56,7 +55,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="Reports & Export Centre"
@@ -211,6 +210,6 @@ export default function ReportsPage() {
           </div>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

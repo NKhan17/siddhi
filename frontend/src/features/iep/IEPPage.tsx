@@ -8,7 +8,6 @@ import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { IEPPlan, IEPGoal } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import {
   PageHeader, Card, LoadingState, ErrorState, EmptyState, Button,
   Modal, Field, Input, Textarea, Select, StatusBadge
@@ -136,7 +135,7 @@ export default function IEPPage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title="IEP Plan & Goals"
@@ -279,6 +278,6 @@ export default function IEPPage() {
           </form>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }

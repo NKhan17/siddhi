@@ -4,7 +4,6 @@ import { useParams, useNavigate, Link } from '../../lib/navigation';
 import { api } from '../../lib/api';
 import type { StudentDetail } from '../../types';
 import { useAuth } from '../../app/AuthContext';
-import { PageShell } from '../../components/layout/PageShell';
 import { LoadingState, ErrorState, Card, Avatar, Button } from '../../components/ui';
 import { formatDate, ageFromDob } from '../../lib/utils';
 import {
@@ -58,13 +57,13 @@ export default function StudentProfilePage() {
     enabled: !!studentId,
   });
 
-  if (isLoading) return <PageShell><LoadingState /></PageShell>;
-  if (error || !student) return <PageShell><ErrorState message="Student not found or access denied." /></PageShell>;
+  if (isLoading) return <><LoadingState /></>;
+  if (error || !student) return <><ErrorState message="Student not found or access denied." /></>;
 
   const canEdit = user?.active_role && ['school_admin', 'special_educator', 'school_head'].includes(user.active_role);
 
   return (
-    <PageShell>
+    <>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-start gap-4 mb-6">
@@ -237,6 +236,6 @@ export default function StudentProfilePage() {
           </div>
         </div>
       </div>
-    </PageShell>
+    </>
   );
 }

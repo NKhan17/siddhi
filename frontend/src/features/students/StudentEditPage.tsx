@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '../../lib/api';
 import type { StudentDetail } from '../../types';
-import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, Field, Input, Textarea, Button, LoadingState, ErrorState } from '../../components/ui';
 import { todayISODate } from '../../lib/utils';
 
@@ -62,9 +61,9 @@ export default function StudentEditPage() {
       navigate(`/students/${studentId}`);
     },
   });
-  if (isLoading) return <PageShell><LoadingState /></PageShell>;
-  if (error || !student) return <PageShell><ErrorState message="Unable to load this student profile." /></PageShell>;
-  return <PageShell><div className="max-w-3xl mx-auto"><PageHeader title="Edit Student Profile" subtitle={student.full_name} /><Card><form onSubmit={form.handleSubmit(values => mutation.mutate(values))} className="space-y-5">
+  if (isLoading) return <><LoadingState /></>;
+  if (error || !student) return <><ErrorState message="Unable to load this student profile." /></>;
+  return <><div className="max-w-3xl mx-auto"><PageHeader title="Edit Student Profile" subtitle={student.full_name} /><Card><form onSubmit={form.handleSubmit(values => mutation.mutate(values))} className="space-y-5">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Field label="Full name" htmlFor="full_name" required><Input id="full_name" {...form.register('full_name')} /></Field>
       <Field label="Date of birth" htmlFor="date_of_birth" required><Input id="date_of_birth" type="date" max={today} {...form.register('date_of_birth')} /></Field>
@@ -81,5 +80,5 @@ export default function StudentEditPage() {
     </div>
     {mutation.error && <p className="text-sm text-error-text" role="alert">{mutation.error instanceof Error ? mutation.error.message : 'Unable to save changes.'}</p>}
     <div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => navigate(`/students/${studentId}`)}>Cancel</Button><Button type="submit" loading={mutation.isPending}>Save changes</Button></div>
-  </form></Card></div></PageShell>;
+  </form></Card></div></>;
 }

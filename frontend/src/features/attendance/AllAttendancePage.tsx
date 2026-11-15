@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
 import { api } from '../../lib/api';
-import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Select, StatusBadge, DataTable } from '../../components/ui';
 import { formatDate, todayISODate } from '../../lib/utils';
 
@@ -61,7 +60,7 @@ export default function AllAttendancePage() {
   });
 
   return (
-    <PageShell>
+    <>
       <div className="mx-auto max-w-6xl">
         <PageHeader title="School Attendance" subtitle="Attendance overview across your assigned students" actions={<Button onClick={() => { setServerError(null); setModalOpen(true); }}><Plus size={16} /> Record Attendance</Button>} />
         {isLoading && <LoadingState />}
@@ -120,6 +119,6 @@ export default function AllAttendancePage() {
           </div>
         </Modal>
       </div>
-    </PageShell>
+    </>
   );
 }
