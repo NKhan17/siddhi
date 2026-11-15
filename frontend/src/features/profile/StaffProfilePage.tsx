@@ -24,7 +24,6 @@ export default function StaffProfilePage() {
   const [phone, setPhone] = useState(user?.phone ?? '');
   useEffect(() => setPhone(user?.phone ?? ''), [user?.phone]);
   const phoneMutation = useMutation({ mutationFn: () => api.patch('/profile', { phone }), onSuccess: () => refreshUser() });
-  const durationRepair = useMutation({ mutationFn: () => api.post<{ normalized_sessions: number; duration_constraint: string }>('/admin/repair-therapy-duration') });
   if (!user) return null;
 
   const memberships = user.memberships.filter((membership) => membership.school_id === user.active_school_id);
@@ -48,7 +47,6 @@ export default function StaffProfilePage() {
           </form>
           {phoneMutation.error && <p className="mt-2 text-sm text-error-text" role="alert">{phoneMutation.error instanceof Error ? phoneMutation.error.message : 'Unable to update mobile number.'}</p>}
           {phoneMutation.isSuccess && <p className="mt-2 text-sm text-graphite" role="status">Mobile number updated.</p>}
-          {user.active_role === 'school_admin' && <div className="mt-5 border-t border-dashed border-ink/20 pt-4"><p className="mb-2 text-xs text-graphite">Test database maintenance: normalize malformed therapy durations and enforce the 1–480 minute limit.</p><Button variant="outline" size="sm" loading={durationRepair.isPending} onClick={() => durationRepair.mutate()}>Repair therapy test data</Button>{durationRepair.data && <p className="mt-2 text-xs text-graphite" role="status">Normalized {durationRepair.data.normalized_sessions} session(s); database constraint active.</p>}{durationRepair.error && <p className="mt-2 text-xs text-error-text" role="alert">{durationRepair.error instanceof Error ? durationRepair.error.message : 'Repair failed'}</p>}</div>}
         </Card>
         <Card className="!border-ink/80 !p-6 sm:!p-8">
           <div className="mb-4 flex items-center gap-3"><span className="rounded-full bg-soft-linen p-2 text-graphite"><Building2 size={18} /></span><div><h2 className="font-display text-[27px] text-ink">Workspace</h2><p className="text-xs text-graphite">Your active school access</p></div></div>

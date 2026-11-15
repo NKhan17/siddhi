@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser, database, login, logout, refreshSession, requestPasswordReset, resetPassword, selectRole } from '../../../lib/server/auth';
-import { getData, postData, patchData, exportWorkbook, requireActor } from '../../../lib/server/data';
+import { currentUser, login, logout, refreshSession, requestPasswordReset, resetPassword, selectRole } from '../../../lib/server/auth';
+import { getData, postData, patchData, exportWorkbook } from '../../../lib/server/data';
 import { cookies } from 'next/headers';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -38,14 +38,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (route === 'auth/logout') {
       await logout();
       return NextResponse.json({ message: 'Successfully logged out' });
-    }
-    if (route === 'admin/repair-therapy-duration') {
-      await requireActor(['school_admin']);
-      const db = database();
-      const normalized = await db.query(`UPDATE therapy_sessions SET duration_minutes=60,updated_at=NOW() WHERE duration_minutes>480 RETURNING id`);
-      await db.query(`UPDATE therapy_sessions SET duration_minutes=1,updated_at=NOW() WHERE duration_minutes<1`);
-      await db.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='ck_therapy_sessions_duration_minutes') THEN ALTER TABLE therapy_sessions ADD CONSTRAINT ck_therapy_sessions_duration_minutes CHECK (duration_minutes BETWEEN 1 AND 480); END IF; END $$`);
-      return NextResponse.json({ normalized_sessions: normalized.rowCount ?? 0, duration_constraint: '1..480 minutes' });
     }
     if (route === 'auth/refresh') {
       const refreshed = await refreshSession((await cookies()).get('refresh_token')?.value);
