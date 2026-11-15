@@ -110,7 +110,7 @@ export default function ReportsPage() {
                           <td className="px-4 py-2 text-slate-gray">{s.grade_class}</td>
                           <td className="px-4 py-2 text-slate-gray text-xs">{s.disability_category}</td>
                           <td className="px-4 py-2">
-                            <span className={`text-xs px-2 py-0.5 rounded ${s.active_iep ? 'bg-pale-sage text-ink-black' : 'bg-bone text-mist-gray'}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded ${s.active_iep ? 'bg-pale-sage text-ink-black' : 'bg-bone text-graphite'}`}>
                               {s.active_iep ? (s.academic_year || 'Active') : 'None'}
                             </span>
                           </td>

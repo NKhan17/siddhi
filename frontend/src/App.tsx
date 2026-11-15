@@ -23,7 +23,9 @@ import AccommodationsPage from './features/accommodations/AccommodationsPage';
 import CommunicationsPage from './features/communications/CommunicationsPage';
 import AssessmentsPage from './features/assessments/AssessmentsPage';
 import AttendancePage from './features/attendance/AttendancePage';
+import AllAttendancePage from './features/attendance/AllAttendancePage';
 import ReviewsPage from './features/reviews/ReviewsPage';
+import AllReviewsPage from './features/reviews/AllReviewsPage';
 import ReportsPage from './features/reports/ReportsPage';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
@@ -51,6 +53,8 @@ function RouteContent() {
   if (pathname === '/guardian') return <ProtectedRoute allowedRoles={['guardian']}><GuardianDashboard /></ProtectedRoute>;
   if (pathname === '/profile' || pathname === '/guardian/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
   if (pathname === '/staff') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StaffDashboard /></ProtectedRoute>;
+  if (pathname === '/attendance') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllAttendancePage /></ProtectedRoute>;
+  if (pathname === '/reviews') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllReviewsPage /></ProtectedRoute>;
   if (pathname === '/students') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StudentsListPage /></ProtectedRoute>;
   if (studentId && !section) return <ProtectedRoute><StudentProfilePage /></ProtectedRoute>;
   if (studentId && section === 'edit') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><StudentEditPage /></ProtectedRoute>;

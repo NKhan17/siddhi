@@ -98,6 +98,23 @@ export async function getData(path: string[], request: Request): Promise<any> {
     return { total_students: students.length, active_plans: plans?.n ?? 0, total_goals: totalGoals, achieved_goals: achieved, students: students.map(s => ({...s, goal_attainment_pct: Number(s.total_goals) ? Math.round(Number(s.achieved_goals)/Number(s.total_goals)*1000)/10 : null})) };
   }
 
+  if (path[0] === 'attendance' && path.length === 1) {
+    if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to view school attendance');
+    const values: unknown[] = [school];
+    const dateClauses: string[] = [];
+    if (query.get('from_date')) { values.push(query.get('from_date')); dateClauses.push(`a.attendance_date >= $${values.length}`); }
+    if (query.get('to_date')) { values.push(query.get('to_date')); dateClauses.push(`a.attendance_date <= $${values.length}`); }
+    const dateFilter = dateClauses.length ? ` AND ${dateClauses.join(' AND ')}` : '';
+    const students = await rows(`SELECT s.id AS student_id,s.full_name,s.grade_class,s.disability_category,COUNT(a.id)::int AS total_days,COUNT(a.id) FILTER (WHERE a.status='present')::int AS present,COUNT(a.id) FILTER (WHERE a.status='absent')::int AS absent,COUNT(a.id) FILTER (WHERE a.status='leave')::int AS leave,COUNT(a.id) FILTER (WHERE a.status='other')::int AS other,CASE WHEN COUNT(a.id)=0 THEN NULL ELSE ROUND(COUNT(a.id) FILTER (WHERE a.status='present')::numeric/COUNT(a.id)*100,1) END AS attendance_pct FROM students s LEFT JOIN attendance_records a ON a.student_id=s.id AND a.school_id=s.school_id${dateFilter} WHERE s.school_id=$1 AND s.is_active=TRUE GROUP BY s.id ORDER BY s.full_name`, values);
+    const records = await rows(`SELECT a.id,a.student_id,s.full_name AS student_name,s.grade_class,a.attendance_date,a.status,a.reason,u.full_name AS recorded_by_name FROM attendance_records a JOIN students s ON s.id=a.student_id LEFT JOIN users u ON u.id=a.recorded_by_user_id WHERE a.school_id=$1${dateFilter} ORDER BY a.attendance_date DESC,s.full_name`, values);
+    return { students, records };
+  }
+
+  if (path[0] === 'reviews' && path.length === 1) {
+    if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to view school reviews');
+    return rows(`SELECT r.*,s.full_name AS student_name,s.grade_class,p.academic_year,COALESCE((SELECT json_agg(json_build_object('id',a.id,'iep_review_id',a.iep_review_id,'approver_user_id',a.approver_user_id,'approver_name',u.full_name,'required_role',a.required_role,'status',a.status,'comment',a.comment,'decision_at',a.decision_at,'created_at',a.created_at) ORDER BY a.created_at) FROM iep_approvals a LEFT JOIN users u ON u.id=a.approver_user_id WHERE a.iep_review_id=r.id),'[]') AS approvals FROM iep_reviews r JOIN students s ON s.id=r.student_id JOIN iep_plans p ON p.id=r.iep_plan_id WHERE r.school_id=$1 ORDER BY r.scheduled_date DESC`,[school]);
+  }
+
   if (path[0] === 'students' && id && path[2]) {
     await studentAccess(actor, id);
     const section = path[2];
@@ -147,10 +164,19 @@ export async function postData(path: string[], body: Record<string, any>) {
   const id = path[1];
   const role = actor.active_role;
   const insert = async (table: string, columns: string[], values: unknown[]) => {
-    const names = ['id', ...columns];
+    // SQLAlchemy's timestamp defaults are application-side defaults, not
+    // PostgreSQL column defaults. Raw SQL inserts must populate them explicitly.
+    const timestampColumns = table === 'present_level_records' || table === 'progress_entries'
+      ? ['created_at']
+      : ['created_at', 'updated_at'];
+    const names = ['id', ...columns, ...timestampColumns];
     const params = [randomUUID(), ...values];
-    const placeholders = params.map((_, i) => `$${i+1}`).join(',');
-    const result = await db.query(`INSERT INTO ${table} (${names.join(',')}) VALUES (${placeholders}) RETURNING *`, params);
+    const placeholders = params.map((_, i) => `$${i+1}`);
+    const timestampValues = timestampColumns.map(() => 'NOW()');
+    const result = await db.query(
+      `INSERT INTO ${table} (${names.join(',')}) VALUES (${[...placeholders, ...timestampValues].join(',')}) RETURNING *`,
+      params,
+    );
     return result.rows[0];
   };
   if (path[0] === 'students' && id && path[2] === 'plop') {
@@ -175,6 +201,13 @@ export async function postData(path: string[], body: Record<string, any>) {
     if (!['special_educator','psychologist','school_head'].includes(role)) fail(403,'Not authorized to create assessments');
     await studentAccess(actor,id,true);
     return insert('assessment_records',['school_id','student_id','assessment_type','domain','assessment_date','assessor_user_id','summary','recommendations','guardian_visible','next_review_date'],[school,id,body.assessment_type,body.domain??null,body.assessment_date,actor.id,body.summary,body.recommendations??null,body.guardian_visible??false,body.next_review_date??null]);
+  }
+  if (path[0] === 'attendance' && path.length === 1) {
+    if (!['present','absent','leave','other'].includes(body.status)) fail(400,'Invalid attendance status');
+    if (!['special_educator','school_head','school_admin'].includes(role)) fail(403,'Not authorized to record attendance');
+    if (typeof body.student_id !== 'string') fail(400,'A student must be selected');
+    await studentAccess(actor,body.student_id,true);
+    return insert('attendance_records',['school_id','student_id','attendance_date','status','reason','recorded_by_user_id'],[school,body.student_id,body.attendance_date,body.status,body.reason??null,actor.id]);
   }
   if (path[0] === 'students' && id && path[2] === 'attendance') {
     if (!['present','absent','leave','other'].includes(body.status)) fail(400,'Invalid attendance status');

@@ -26,7 +26,7 @@ function getNavItems(role: Role): NavItem[] {
       items = [dashboard, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
       break;
     case 'special_educator':
-      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP goals', to: '/students', icon: <BookOpen size={20} strokeWidth={1.7} /> }, { label: 'Attendance', to: '/students', icon: <Calendar size={20} strokeWidth={1.7} /> }, { label: 'Reviews', to: '/students', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP goals', to: '/students', icon: <BookOpen size={20} strokeWidth={1.7} /> }, { label: 'Attendance', to: '/attendance', icon: <Calendar size={20} strokeWidth={1.7} /> }, { label: 'Reviews', to: '/reviews', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
       break;
     case 'therapist':
       items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Therapy', to: '/students', icon: <Heart size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
@@ -38,7 +38,7 @@ function getNavItems(role: Role): NavItem[] {
       items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Assessments', to: '/students', icon: <FileText size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
       break;
     case 'school_head':
-      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP reviews', to: '/students', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
+      items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'IEP reviews', to: '/reviews', icon: <ClipboardCheck size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
       break;
     case 'school_admin':
       items = [dashboard, { label: 'Students', to: '/students', icon: <Users size={20} strokeWidth={1.7} /> }, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];

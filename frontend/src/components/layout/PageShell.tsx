@@ -12,7 +12,7 @@ interface PageShellProps { children: React.ReactNode }
 
 const sectionNames: Array<[RegExp, string]> = [
   [/^\/guardian$/, 'Family overview'], [/^\/profile$/, 'My profile'], [/^\/guardian\/profile$/, 'My profile'],
-  [/^\/staff$/, 'Dashboard'], [/^\/students$/, 'Students'], [/^\/students\/[^/]+$/, 'Student profile'], [/^\/reports$/, 'Reports'],
+  [/^\/staff$/, 'Dashboard'], [/^\/students$/, 'Students'], [/^\/attendance$/, 'School attendance'], [/^\/reviews$/, 'IEP reviews'], [/^\/students\/[^/]+$/, 'Student profile'], [/^\/reports$/, 'Reports'],
   [/\/plop$/, 'Present level of performance'], [/\/iep$/, 'IEP plan'], [/\/progress$/, 'Progress'],
   [/\/therapy$/, 'Therapy'], [/\/accommodations$/, 'Accommodations'], [/\/communications$/, 'Communications'],
   [/\/assessments$/, 'Assessments'], [/\/attendance$/, 'Attendance'], [/\/reviews$/, 'Reviews'], [/\/edit$/, 'Edit student'],
