@@ -34,7 +34,7 @@ export function PageShell({ children }: PageShellProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (lastPathname.current !== pathname) {
-      const isHistoryBack = historyBackPending.current || document.documentElement.dataset.navigationDirection === 'back';
+      const isHistoryBack = historyBackPending.current;
       if (isHistoryBack && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const page = document.querySelector<HTMLElement>('.workspace-page');
         page?.animate(
@@ -54,7 +54,38 @@ export function PageShell({ children }: PageShellProps) {
     const handlePopState = (event: PopStateEvent) => {
       const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
       historyBackPending.current = !hasBrowserTransition && window.location.pathname !== lastPathname.current;
-      if (historyBackPending.current) document.documentElement.dataset.navigationDirection = 'back';
+      if (!historyBackPending.current) return;
+
+      const root = document.documentElement;
+      root.dataset.navigationDirection = 'back';
+      const viewDocument = document as Document & {
+        startViewTransition?: (update: () => void | Promise<void>) => { finished: Promise<void> };
+      };
+      if (viewDocument.startViewTransition) {
+        const previousContent = document.querySelector('.workspace-page')?.textContent ?? '';
+        try {
+          const transition = viewDocument.startViewTransition(() => new Promise<void>((resolve) => {
+            const finish = () => {
+              observer.disconnect();
+              window.clearTimeout(timeout);
+              resolve();
+            };
+            const observer = new MutationObserver(() => {
+              const nextContent = document.querySelector('.workspace-page')?.textContent ?? '';
+              if (window.location.pathname !== lastPathname.current && nextContent !== previousContent) finish();
+            });
+            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+            const timeout = window.setTimeout(finish, 1200);
+          }));
+          historyBackPending.current = false;
+          const clearDirection = () => {
+            if (root.dataset.navigationDirection === 'back') delete root.dataset.navigationDirection;
+          };
+          void transition.finished.then(clearDirection, clearDirection);
+        } catch {
+          // Keep the post-commit animation fallback below if the browser rejects a transition.
+        }
+      }
     };
     window.addEventListener('popstate', handlePopState, true);
     return () => window.removeEventListener('popstate', handlePopState, true);
