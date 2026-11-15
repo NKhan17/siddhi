@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from '../../lib/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -30,6 +30,7 @@ export default function AttendancePage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [recordSearch, setRecordSearch] = useState('');
 
   const today = todayISODate();
   const canWrite = user?.active_role && ['special_educator', 'school_head', 'school_admin'].includes(user.active_role);
@@ -48,6 +49,11 @@ export default function AttendancePage() {
     }),
     enabled: !!studentId,
   });
+
+  const filteredRecords = useMemo(() => {
+    const term = recordSearch.trim().toLowerCase();
+    return (data ?? []).filter(record => !term || `${record.status} ${record.reason ?? ''} ${record.recorded_by_name ?? ''}`.toLowerCase().includes(term));
+  }, [data, recordSearch]);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -113,11 +119,15 @@ export default function AttendancePage() {
         {isLoading && <LoadingState />}
         {error && <ErrorState message="Unable to load attendance records." />}
 
-        {data && data.length === 0 && (
-          <EmptyState title="No attendance records found" />
-        )}
-
         {data && data.length > 0 && (
+          <div className="mb-3 max-w-sm">
+            <Input type="search" value={recordSearch} onChange={event => setRecordSearch(event.target.value)} placeholder="Search attendance records… (Ctrl+F)" aria-label="Search attendance records" data-app-search-input="true" />
+          </div>
+        )}
+        {data && data.length === 0 && <EmptyState title="No attendance records found" />}
+        {data && data.length > 0 && filteredRecords.length === 0 && <EmptyState title="No matching attendance records" />}
+
+        {data && filteredRecords.length > 0 && (
           <DataTable
             columns={[
               { key: 'date', header: 'Date', render: r => formatDate(r.attendance_date) },
@@ -125,7 +135,7 @@ export default function AttendancePage() {
               { key: 'reason', header: 'Reason', render: r => <span className="text-xs text-slate-gray">{r.reason || '—'}</span> },
               { key: 'by', header: 'Recorded By', render: r => <span className="text-xs text-muted-text">{r.recorded_by_name || '—'}</span> },
             ]}
-            data={data}
+            data={filteredRecords}
             keyExtractor={r => r.id}
           />
         )}

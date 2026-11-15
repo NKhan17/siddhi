@@ -57,4 +57,50 @@ describe('Next.js data API authorization', () => {
     })).rejects.toMatchObject({ status: 400, message: 'Duration must be between 1 and 480 minutes (8 hours)' });
     expect(query).not.toHaveBeenCalled();
   });
+  it('includes historical guardian-null interactions for a linked guardian', async () => {
+    currentUserMock.mockResolvedValue(actor('guardian'));
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [{ id: 'student-1', school_id: 'school-1' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ linked: true }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ id: 'interaction-1', guardian_user_id: null }], rowCount: 1 });
+    databaseMock.mockReturnValue({ query } as never);
+    const result = await getData(['students', 'student-1', 'parent-interactions'], new Request('https://siddhi.test/api/v1/students/student-1/parent-interactions'));
+    expect(result).toHaveLength(1);
+    expect(query.mock.calls[2][0]).toContain('i.guardian_user_id IS NULL');
+  });
+
+  it('allows only a linked guardian to request the stored full UDID', async () => {
+    currentUserMock.mockResolvedValue(actor('guardian'));
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [{ id: 'student-1', school_id: 'school-1' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ linked: true }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ udid_number_encrypted: 'stored-value' }], rowCount: 1 });
+    databaseMock.mockReturnValue({ query } as never);
+    const result = await getData(['students', 'student-1', 'udid'], new Request('https://siddhi.test/api/v1/students/student-1/udid'));
+    expect(result).toEqual({ udid_number: 'stored-value' });
+    expect(query.mock.calls[2][0]).toContain('udid_number_encrypted');
+  });
+
+  it('does not expose the full UDID endpoint to staff roles', async () => {
+    currentUserMock.mockResolvedValue(actor('school_admin'));
+    const query = vi.fn();
+    databaseMock.mockReturnValue({ query } as never);
+    await expect(getData(['students', 'student-1', 'udid'], new Request('https://siddhi.test/api/v1/students/student-1/udid')))
+      .rejects.toMatchObject({ status: 403, message: 'Only the linked guardian can view the full UDID' });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('lets a linked guardian acknowledge a historical interaction with no guardian id', async () => {
+    currentUserMock.mockResolvedValue(actor('guardian'));
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [{ student_id: 'student-1', guardian_user_id: null }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ id: 'student-1', school_id: 'school-1' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ linked: true }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ id: 'interaction-1', acknowledgement_status: 'acknowledged' }], rowCount: 1 });
+    databaseMock.mockReturnValue({ query } as never);
+    const result = await postData(['parent-interactions', 'interaction-1', 'acknowledge'], {});
+    expect(result.acknowledgement_status).toBe('acknowledged');
+    expect(query.mock.calls[3][0]).toContain('guardian_user_id IS NULL');
+  });
+
 });

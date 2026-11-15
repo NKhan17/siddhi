@@ -65,20 +65,26 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
     <aside
       className={mobile
         ? 'flex h-full w-[min(290px,86vw)] flex-col border-r border-ink/15 bg-warm-parchment'
-        : 'hidden h-screen w-[76px] shrink-0 flex-col border-r border-ink/15 bg-warm-parchment md:sticky md:top-0 md:flex'}
+        : 'hidden h-screen w-[76px] shrink-0 flex-col border-r border-ink/15 bg-warm-parchment md:sticky md:top-0 md:flex xl:w-[280px]'}
       aria-label="Main navigation"
     >
-      <div className="flex h-[72px] items-center justify-center border-b border-ink/15">
+      <div className={`flex h-[72px] shrink-0 items-center border-b border-ink/15 ${mobile ? 'justify-between px-5' : 'justify-center xl:justify-start xl:px-5'}`}>
         {mobile ? (
-          <div className="flex w-full items-center justify-between px-5">
-            <span className="font-display text-[26px] leading-none tracking-tight text-ink">Siddhi</span>
+          <>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-[17px] font-semibold tracking-tight text-ink">S</span>
+              <span className="min-w-0"><span className="block font-display text-xl leading-none tracking-tight text-ink">Siddhi</span><span className="mt-1 block text-[10px] uppercase tracking-[0.16em] text-graphite">IEP workspace</span></span>
+            </div>
             <button onClick={onClose} className="rounded-full border border-ink/20 p-2 text-graphite hover:bg-soft-linen" aria-label="Close navigation"><X size={18} /></button>
-          </div>
+          </>
         ) : (
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-ink text-[17px] font-semibold tracking-tight text-ink" aria-label="Siddhi">S</span>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-[17px] font-semibold tracking-tight text-ink" aria-label="Siddhi">S</span>
+            <span className="hidden min-w-0 xl:block"><span className="block text-[11px] font-medium uppercase tracking-[0.18em] text-graphite">Siddhi</span><span className="block text-sm font-medium text-ink">Workspace</span></span>
+          </div>
         )}
       </div>
-      <nav className={mobile ? 'flex flex-1 flex-col gap-2 px-4 py-6' : 'flex flex-1 flex-col items-center gap-3 px-3 py-6'} aria-label="Sidebar navigation">
+      <nav className={mobile ? 'flex flex-1 flex-col gap-2 px-4 py-6' : 'flex flex-1 flex-col items-center gap-3 overflow-y-auto px-3 py-6 xl:items-stretch xl:px-4'} aria-label="Sidebar navigation">
         {navItems.map((item) => (
           <NavLink
             key={`${item.label}-${item.to}`}
@@ -87,17 +93,17 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
             title={item.label}
             aria-label={item.label}
             className={({ isActive }) => mobile
-              ? `flex items-center gap-3 rounded-full px-4 py-3 text-sm transition-colors ${isActive ? 'bg-ink text-white' : 'text-graphite hover:bg-soft-linen'}`
-              : `group relative flex h-11 w-11 items-center justify-center rounded-full border transition-colors ${isActive ? 'border-ink bg-ink text-white' : 'border-transparent text-graphite hover:border-pale-stone hover:bg-gallery-white'}`}
+              ? `flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${isActive ? 'bg-ink text-white' : 'text-graphite hover:bg-soft-linen'}`
+              : `group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors xl:h-11 xl:w-full xl:justify-start xl:gap-3 xl:px-4 ${isActive ? 'border-ink bg-ink text-white' : 'border-transparent text-graphite hover:border-pale-stone hover:bg-gallery-white'}`}
           >
             {item.icon}
-            {mobile && <span>{item.label}</span>}
-            {!mobile && <span className="pointer-events-none absolute left-[calc(100%+12px)] z-30 hidden whitespace-nowrap rounded-full border border-ink/15 bg-gallery-white px-3 py-1.5 text-xs text-ink group-hover:block">{item.label}</span>}
+            <span className={mobile ? 'block' : 'hidden xl:block'}>{item.label}</span>
+            {!mobile && <span className="pointer-events-none absolute left-[calc(100%+12px)] z-30 hidden whitespace-nowrap rounded-lg border border-ink/15 bg-gallery-white px-3 py-1.5 text-xs text-ink group-hover:block xl:hidden">{item.label}</span>}
           </NavLink>
         ))}
       </nav>
-      <div className={mobile ? 'border-t border-ink/15 px-4 py-5 text-xs text-graphite' : 'border-t border-ink/15 py-4 text-center text-[10px] tracking-[0.18em] text-graphite'}>
-        {mobile ? 'SIDDHI · IEP WORKSPACE' : 'IEP'}
+      <div className={mobile ? 'border-t border-ink/15 px-4 py-5 text-xs text-graphite' : 'border-t border-ink/15 py-4 text-center text-[10px] tracking-[0.18em] text-graphite xl:text-left xl:px-6'}>
+        {mobile ? 'SIDDHI · IEP WORKSPACE' : <><span className="xl:hidden">IEP</span><span className="hidden xl:inline">INDIVIDUALIZED EDUCATION</span></>}
       </div>
     </aside>
   );

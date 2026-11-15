@@ -1,7 +1,7 @@
 """Bound therapy session durations to realistic values.
 
 Revision ID: 20261115_therapy_duration_bounds
-Revises: 8fee2c7bca17
+Revises: 1b6c4a1f2d3e
 Create Date: 2026-11-15
 """
 from typing import Sequence, Union
@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision: str = '20261115_therapy_duration_bounds'
-down_revision: Union[str, Sequence[str], None] = '8fee2c7bca17'
+down_revision: Union[str, Sequence[str], None] = '1b6c4a1f2d3e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

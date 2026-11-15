@@ -141,6 +141,13 @@ export async function getData(path: string[], request: Request): Promise<any> {
     return rows(`SELECT r.*,s.full_name AS student_name,s.grade_class,p.academic_year,COALESCE((SELECT json_agg(json_build_object('id',a.id,'iep_review_id',a.iep_review_id,'approver_user_id',a.approver_user_id,'approver_name',u.full_name,'required_role',a.required_role,'status',a.status,'comment',a.comment,'decision_at',a.decision_at,'created_at',a.created_at) ORDER BY a.created_at) FROM iep_approvals a LEFT JOIN users u ON u.id=a.approver_user_id WHERE a.iep_review_id=r.id),'[]') AS approvals FROM iep_reviews r JOIN students s ON s.id=r.student_id JOIN iep_plans p ON p.id=r.iep_plan_id WHERE r.school_id=$1 ORDER BY r.scheduled_date DESC`,[school]);
   }
 
+  if (path[0] === 'students' && id && path[2] === 'udid' && path.length === 3) {
+    if (role !== 'guardian') fail(403, 'Only the linked guardian can view the full UDID');
+    await studentAccess(actor, id);
+    const record = await one('SELECT udid_number_encrypted FROM students WHERE id=$1 AND school_id=$2', [id, school]);
+    return { udid_number: record?.udid_number_encrypted ?? null };
+  }
+
   if (path[0] === 'students' && id && path[2]) {
     await studentAccess(actor, id);
     const section = path[2];
@@ -150,7 +157,7 @@ export async function getData(path: string[], request: Request): Promise<any> {
     if (section === 'progress') return rows(`SELECT g.id AS goal_id,g.domain,g.annual_goal,g.status AS goal_status,MAX(p.observed_at) AS latest_observed_at,MAX(p.rating) FILTER (WHERE p.term='baseline') AS baseline,MAX(p.rating) FILTER (WHERE p.term='term_1') AS term_1,MAX(p.rating) FILTER (WHERE p.term='term_2') AS term_2,MAX(p.rating) FILTER (WHERE p.term='term_3') AS term_3,MAX(p.rating) FILTER (WHERE p.term='final') AS final,MAX(p.rating) AS latest_rating,COALESCE(json_agg(json_build_object('id',p.id,'student_id',p.student_id,'goal_id',p.goal_id,'objective_id',p.objective_id,'term',p.term,'rating',p.rating,'observation',p.observation,'assessed_by_user_id',p.assessed_by_user_id,'assessed_by_name',u.full_name,'observed_at',p.observed_at,'created_at',p.created_at)) FILTER (WHERE p.id IS NOT NULL), '[]') AS entries FROM iep_goals g LEFT JOIN progress_entries p ON p.goal_id=g.id LEFT JOIN users u ON u.id=p.assessed_by_user_id WHERE g.student_id=$1 AND g.school_id=$2 GROUP BY g.id ORDER BY g.created_at`, [id,school]);
     if (section === 'therapy-sessions') return rows(`SELECT t.*,u.full_name AS therapist_name FROM therapy_sessions t JOIN users u ON u.id=t.therapist_user_id WHERE t.student_id=$1 AND t.school_id=$2 AND ($3=FALSE OR t.guardian_visible=TRUE) AND ($4::text IS NULL OR t.therapy_type=$4) ORDER BY t.session_date DESC`, [id,school,guardianOnly,query.get('therapy_type')]);
     if (section === 'accommodations') return rows(`SELECT a.*,u.full_name AS responsible_staff_name FROM accommodations a LEFT JOIN users u ON u.id=a.responsible_staff_user_id WHERE a.student_id=$1 AND a.school_id=$2 ORDER BY a.effective_from DESC`, [id,school]);
-    if (section === 'parent-interactions') return rows(`SELECT i.*,g.full_name AS guardian_name,u.full_name AS recorded_by_name FROM parent_interactions i LEFT JOIN users g ON g.id=i.guardian_user_id LEFT JOIN users u ON u.id=i.recorded_by_user_id WHERE i.student_id=$1 AND i.school_id=$2 AND ($3=FALSE OR i.guardian_user_id=$4) ORDER BY i.interaction_date DESC`, [id,school,guardianOnly,actor.id]);
+    if (section === 'parent-interactions') return rows(`SELECT i.*,g.full_name AS guardian_name,u.full_name AS recorded_by_name FROM parent_interactions i LEFT JOIN users g ON g.id=i.guardian_user_id LEFT JOIN users u ON u.id=i.recorded_by_user_id WHERE i.student_id=$1 AND i.school_id=$2 AND ($3=FALSE OR i.guardian_user_id=$4 OR i.guardian_user_id IS NULL) ORDER BY i.interaction_date DESC`, [id,school,guardianOnly,actor.id]);
     if (section === 'assessments') return rows(`SELECT a.*,u.full_name AS assessor_name FROM assessment_records a LEFT JOIN users u ON u.id=a.assessor_user_id WHERE a.student_id=$1 AND a.school_id=$2 AND ($3=FALSE OR a.guardian_visible=TRUE) ORDER BY a.assessment_date DESC`, [id,school,guardianOnly]);
     if (section === 'attendance') {
       if (path[3] === 'summary') {
@@ -319,7 +326,10 @@ export async function postData(path: string[], body: Record<string, any>) {
   }
   if (path[0] === 'parent-interactions' && id && path[2] === 'acknowledge') {
     if (role !== 'guardian') fail(403,'Guardian role required');
-    const result = await db.query(`UPDATE parent_interactions SET acknowledgement_status='acknowledged',acknowledged_at=NOW() WHERE id=$1 AND school_id=$2 AND guardian_user_id=$3 RETURNING *`,[id,school,actor.id]);
+    const interaction = await one('SELECT student_id,guardian_user_id FROM parent_interactions WHERE id=$1 AND school_id=$2', [id, school]);
+    if (!interaction || (interaction.guardian_user_id && interaction.guardian_user_id !== actor.id)) fail(404,'Interaction not found');
+    await studentAccess(actor, interaction.student_id);
+    const result = await db.query(`UPDATE parent_interactions SET acknowledgement_status='acknowledged',acknowledged_at=NOW() WHERE id=$1 AND school_id=$2 AND (guardian_user_id=$3 OR guardian_user_id IS NULL) RETURNING *`,[id,school,actor.id]);
     if (!result.rowCount) fail(404,'Interaction not found');
     return result.rows[0];
   }

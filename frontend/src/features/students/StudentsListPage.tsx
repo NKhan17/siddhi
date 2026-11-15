@@ -49,6 +49,7 @@ export default function StudentsListPage() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           aria-label="Search students"
+          data-app-search-input="true"
         />
       </div>
 

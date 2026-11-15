@@ -2,6 +2,7 @@
  * Shared UI components for Siddhi
  */
 import React from 'react';
+const { useCallback, useEffect, useId, useRef } = React;
 import type { ElementType } from 'react';
 import { Loader2 } from 'lucide-react';
 import { RATING_LABELS } from '../../lib/utils';
@@ -241,11 +242,38 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children, footer, maxWidth = 'max-w-lg' }: ModalProps) {
+  const modalId = useId();
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const close = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.state?.__siddhiModal === modalId) window.history.back();
+    else onCloseRef.current();
+  }, [modalId]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.history.pushState({ ...(window.history.state ?? {}), __siddhiModal: modalId }, '', window.location.href);
+    const handlePopState = () => onCloseRef.current();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); close(); }
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('keydown', handleKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('keydown', handleKeyDown);
+      if (window.history.state?.__siddhiModal === modalId) window.history.back();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, modalId, close]);
+
   if (!open) return null;
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && close()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -256,7 +284,7 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'max-
             {title}
           </h2>
           <button
-            onClick={onClose}
+            onClick={close}
             aria-label="Close dialog"
             className="text-slate-gray hover:text-ink-black transition-colors"
           >

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { api } from '../../lib/api';
 import { PageShell } from '../../components/layout/PageShell';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Select, StatusBadge, DataTable } from '../../components/ui';
@@ -27,6 +27,7 @@ export default function AllAttendancePage() {
   const [reason, setReason] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [studentSearch, setStudentSearch] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
   const today = todayISODate();
 
@@ -35,6 +36,15 @@ export default function AllAttendancePage() {
     queryFn: () => api.get('/attendance', { from_date: fromDate || undefined, to_date: toDate || undefined }),
   });
   const students = data?.students ?? [];
+  const filteredStudents = useMemo(() => {
+    const term = studentSearch.trim().toLowerCase();
+    return term ? students.filter(student => `${student.full_name} ${student.grade_class}`.toLowerCase().includes(term)) : students;
+  }, [students, studentSearch]);
+  const filteredRecords = useMemo(() => {
+    const term = studentSearch.trim().toLowerCase();
+    const records = data?.records ?? [];
+    return term ? records.filter(record => `${record.student_name} ${record.grade_class} ${record.status} ${record.reason ?? ''}`.toLowerCase().includes(term)) : records;
+  }, [data?.records, studentSearch]);
   const totals = useMemo(() => students.reduce((acc, s) => ({
     students: acc.students + 1, days: acc.days + s.total_days, present: acc.present + s.present, absent: acc.absent + s.absent,
   }), { students: 0, days: 0, present: 0, absent: 0 }), [students]);
@@ -64,7 +74,13 @@ export default function AllAttendancePage() {
             <Card className="p-4"><p className="text-xs text-graphite">Absent</p><p className="mt-1 text-2xl font-medium text-ink-black">{totals.absent}</p></Card>
           </div>
           <Card className="mb-6 p-4">
-            <h2 className="mb-3 text-sm font-medium text-ink-black">Attendance by student</h2>
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-sm font-medium text-ink-black">Attendance by student</h2>
+              <div className="relative w-full sm:max-w-xs">
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-text" aria-hidden="true" />
+                <Input type="search" value={studentSearch} onChange={event => setStudentSearch(event.target.value)} placeholder="Search students… (Ctrl+F)" aria-label="Search attendance students" data-app-search-input="true" className="pl-9" />
+              </div>
+            </div>
             <DataTable columns={[
               { key: 'student', header: 'Student', render: s => <span className="font-medium text-ink-black">{s.full_name}</span> },
               { key: 'grade', header: 'Grade', render: s => <span className="text-graphite">{s.grade_class}</span> },
@@ -72,8 +88,9 @@ export default function AllAttendancePage() {
               { key: 'present', header: 'Present', render: s => s.present },
               { key: 'absent', header: 'Absent', render: s => s.absent },
               { key: 'rate', header: 'Attendance %', render: s => <span className="font-medium text-ink-black">{s.attendance_pct == null ? '—' : `${s.attendance_pct}%`}</span> },
-            ]} data={students} keyExtractor={s => s.student_id} />
+            ]} data={filteredStudents} keyExtractor={s => s.student_id} />
             {students.length === 0 && <EmptyState title="No students are assigned to this account" />}
+            {students.length > 0 && filteredStudents.length === 0 && <EmptyState title="No matching students" description="Try another name or class." />}
           </Card>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-medium text-ink-black">Daily attendance log</h2>
@@ -83,18 +100,19 @@ export default function AllAttendancePage() {
               {(fromDate || toDate) && <Button variant="ghost" size="sm" onClick={() => { setFromDate(''); setToDate(''); }}>Clear</Button>}
             </div>
           </div>
-          {data.records.length ? <DataTable columns={[
+          {filteredRecords.length ? <DataTable columns={[
             { key: 'date', header: 'Date', render: r => formatDate(r.attendance_date) },
             { key: 'student', header: 'Student', render: r => <span className="font-medium text-ink-black">{r.student_name}</span> },
             { key: 'grade', header: 'Grade', render: r => r.grade_class },
             { key: 'status', header: 'Status', render: r => <StatusBadge status={r.status} /> },
             { key: 'reason', header: 'Reason', render: r => r.reason || '—' },
             { key: 'by', header: 'Recorded by', render: r => r.recorded_by_name || '—' },
-          ]} data={data.records} keyExtractor={r => r.id} /> : <EmptyState title="No attendance records for this period" />}
+          ]} data={filteredRecords} keyExtractor={r => r.id} /> : <EmptyState title={studentSearch ? 'No matching attendance records' : 'No attendance records for this period'} />}
         </>}
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Record Attendance" footer={<><Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button><Button onClick={() => mutation.mutate()} loading={mutation.isPending} disabled={!studentId || !attendanceDate}>Save</Button></>}>
           <div className="space-y-4">
-            <Field label="Student" htmlFor="all-attendance-student" required><Select id="all-attendance-student" value={studentId} onChange={e => setStudentId(e.target.value)}><option value="">Select student…</option>{students.map(s => <option key={s.student_id} value={s.student_id}>{s.full_name} · {s.grade_class}</option>)}</Select></Field>
+            <Field label="Find student" htmlFor="all-attendance-student-search"><Input id="all-attendance-student-search" type="search" value={studentSearch} onChange={event => setStudentSearch(event.target.value)} placeholder="Search by name or class…" data-app-search-input="true" /></Field>
+            <Field label="Student" htmlFor="all-attendance-student" required><Select id="all-attendance-student" value={studentId} onChange={e => setStudentId(e.target.value)}><option value="">Select student…</option>{filteredStudents.map(s => <option key={s.student_id} value={s.student_id}>{s.full_name} · {s.grade_class}</option>)}</Select></Field>
             <Field label="Date" htmlFor="all-attendance-date" required><Input id="all-attendance-date" type="date" max={today} value={attendanceDate} onChange={e => setAttendanceDate(e.target.value)} /></Field>
             <Field label="Status" htmlFor="all-attendance-status" required><Select id="all-attendance-status" value={status} onChange={e => setStatus(e.target.value)}><option value="present">Present</option><option value="absent">Absent</option><option value="leave">Leave</option><option value="other">Other</option></Select></Field>
             <Field label="Reason (optional)" htmlFor="all-attendance-reason"><Input id="all-attendance-reason" value={reason} onChange={e => setReason(e.target.value)} /></Field>

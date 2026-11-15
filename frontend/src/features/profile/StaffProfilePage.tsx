@@ -24,6 +24,7 @@ export default function StaffProfilePage() {
   const [phone, setPhone] = useState(user?.phone ?? '');
   useEffect(() => setPhone(user?.phone ?? ''), [user?.phone]);
   const phoneMutation = useMutation({ mutationFn: () => api.patch('/profile', { phone }), onSuccess: () => refreshUser() });
+  const dbMigration = useMutation({ mutationFn: () => api.post<{ previous_revision: string; current_revision: string; normalized_sessions: number; invalid_durations_remaining?: number; already_applied?: boolean }>('/admin/run-therapy-duration-migration') });
   if (!user) return null;
 
   const memberships = user.memberships.filter((membership) => membership.school_id === user.active_school_id);
@@ -48,6 +49,7 @@ export default function StaffProfilePage() {
           {phoneMutation.error && <p className="mt-2 text-sm text-error-text" role="alert">{phoneMutation.error instanceof Error ? phoneMutation.error.message : 'Unable to update mobile number.'}</p>}
           {phoneMutation.isSuccess && <p className="mt-2 text-sm text-graphite" role="status">Mobile number updated.</p>}
         </Card>
+        {user.active_role === 'school_admin' && <Card className="!border-ink/80 !p-6 sm:!p-8"><h2 className="font-display text-[24px] text-ink">Database maintenance</h2><p className="mt-2 text-sm text-graphite">One-time migration: normalize malformed therapy durations and enforce the 1–480 minute database constraint.</p><Button className="mt-4" variant="outline" loading={dbMigration.isPending} onClick={() => dbMigration.mutate()}>Apply therapy-duration migration</Button>{dbMigration.data && <p className="mt-3 text-sm text-graphite" role="status">Database revision: {dbMigration.data.current_revision}. Normalized {dbMigration.data.normalized_sessions} session(s); invalid durations remaining: {dbMigration.data.invalid_durations_remaining ?? 0}.{dbMigration.data.already_applied ? ' Migration was already applied.' : ''}</p>}{dbMigration.error && <p className="mt-3 text-sm text-error-text" role="alert">{dbMigration.error instanceof Error ? dbMigration.error.message : 'Migration failed.'}</p>}</Card>}
         <Card className="!border-ink/80 !p-6 sm:!p-8">
           <div className="mb-4 flex items-center gap-3"><span className="rounded-full bg-soft-linen p-2 text-graphite"><Building2 size={18} /></span><div><h2 className="font-display text-[27px] text-ink">Workspace</h2><p className="text-xs text-graphite">Your active school access</p></div></div>
           {memberships.length > 0 ? memberships.map((membership) => (

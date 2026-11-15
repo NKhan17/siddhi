@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from '../../lib/navigation';
 import { api } from '../../lib/api';
 import type { StudentDetail } from '../../types';
@@ -39,6 +40,17 @@ export default function StudentProfilePage() {
   const { studentId } = useParams<{ studentId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showFullUdid, setShowFullUdid] = useState(false);
+  const isGuardian = user?.active_role === 'guardian';
+
+  const { data: udidRecord, isLoading: isUdidLoading, error: udidError } = useQuery<{ udid_number: string | null }>({
+    queryKey: ['student-udid', studentId],
+    queryFn: () => api.get(`/students/${studentId}/udid`),
+    enabled: !!studentId && showFullUdid && isGuardian,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
 
   const { data: student, isLoading, error } = useQuery<StudentDetail>({
     queryKey: ['student', studentId],
@@ -101,9 +113,21 @@ export default function StudentProfilePage() {
                   <dd className="font-medium text-ink-black">{student.disability_category}</dd>
                 </div>
                 {student.udid_number_masked && (
-                  <div>
-                    <dt className="text-xs text-muted-text">UDID (masked)</dt>
-                    <dd className="font-mono text-ink-black">{student.udid_number_masked}</dd>
+                  <div className="min-w-0">
+                    <dt className="text-xs text-muted-text">Unique Disability ID (UDID)</dt>
+                    <dd className="mt-1 flex flex-wrap items-center gap-2">
+                      <span className="break-all font-mono text-sm font-medium text-ink-black" aria-live="polite">
+                        {isGuardian && showFullUdid
+                          ? isUdidLoading ? 'Loading UDID…' : udidError ? 'Unable to load UDID' : udidRecord?.udid_number || 'No UDID recorded'
+                          : student.udid_number_masked}
+                      </span>
+                      {isGuardian && (
+                        <Button type="button" size="sm" variant="outline" onClick={() => setShowFullUdid(value => !value)} aria-expanded={showFullUdid}>
+                          {showFullUdid ? 'Hide' : 'View full UDID'}
+                        </Button>
+                      )}
+                    </dd>
+                    {isGuardian && <p className="mt-1 text-[11px] text-graphite">Only guardians linked to this student can reveal the full stored value.</p>}
                   </div>
                 )}
                 {student.languages_known && (
