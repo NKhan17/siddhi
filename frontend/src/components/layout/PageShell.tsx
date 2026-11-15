@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Menu, LogOut, ChevronDown, ArrowLeft, Download } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../app/AuthContext';
@@ -11,6 +11,43 @@ import { withViewTransition } from '../../lib/navigation';
 
 interface PageShellProps { children: React.ReactNode }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
+type ViewTransitionDocument = Document & { startViewTransition?: (update: () => void | Promise<void>) => { finished: Promise<void> } };
+
+let committedPathname = '';
+let finishHistoryTransition: (() => void) | null = null;
+let historyTransitionTimeout: number | undefined;
+
+// Register before the App Router's popstate handler so we can snapshot the outgoing route.
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', (event) => {
+    const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
+    const destination = window.location.pathname;
+    if (hasBrowserTransition || !committedPathname || destination === committedPathname) return;
+
+    const root = document.documentElement;
+    root.dataset.navigationDirection = 'back';
+    const viewDocument = document as ViewTransitionDocument;
+    if (!viewDocument.startViewTransition) return;
+
+    try {
+      const transition = viewDocument.startViewTransition(() => new Promise<void>((resolve) => {
+        finishHistoryTransition = resolve;
+        historyTransitionTimeout = window.setTimeout(() => {
+          if (finishHistoryTransition === resolve) {
+            finishHistoryTransition = null;
+            resolve();
+          }
+        }, 1200);
+      }));
+      const clearDirection = () => {
+        if (root.dataset.navigationDirection === 'back') delete root.dataset.navigationDirection;
+      };
+      void transition.finished.then(clearDirection, clearDirection);
+    } catch {
+      finishHistoryTransition = null;
+    }
+  }, true);
+}
 
 const sectionNames: Array<[RegExp, string]> = [
   [/^\/guardian$/, 'Family overview'], [/^\/profile$/, 'My profile'], [/^\/guardian\/profile$/, 'My profile'],
@@ -25,37 +62,31 @@ export function PageShell({ children }: PageShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const lastPathname = useRef(pathname);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const pageTitle = sectionNames.find(([pattern]) => pattern.test(pathname))?.[1] ?? 'Workspace';
 
-  // The catch-all App Router page keeps the same route segment; reset content scroll explicitly.
-  useEffect(() => {
+  // Commit the route after React has updated the DOM. This resolves an in-flight
+  // browser-history View Transition after the destination page has rendered.
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
-    if (lastPathname.current !== pathname) {
-      const isHistoryBack = document.documentElement.dataset.navigationDirection === 'back';
-      if (isHistoryBack && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (finishHistoryTransition) {
+      const finish = finishHistoryTransition;
+      finishHistoryTransition = null;
+      if (historyTransitionTimeout !== undefined) window.clearTimeout(historyTransitionTimeout);
+      historyTransitionTimeout = undefined;
+      finish();
+    } else if (document.documentElement.dataset.navigationDirection === 'back') {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const page = document.querySelector<HTMLElement>('.workspace-page');
         page?.animate(
           [{ opacity: 0.82, transform: 'translateX(-18px)' }, { opacity: 1, transform: 'translateX(0)' }],
           { duration: 220, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
         );
       }
-      if (document.documentElement.dataset.navigationDirection === 'back') delete document.documentElement.dataset.navigationDirection;
-      lastPathname.current = pathname;
+      delete document.documentElement.dataset.navigationDirection;
     }
+    committedPathname = pathname;
   }, [pathname]);
-
-  // Let the browser own edge-swipe gestures. If it doesn't supply a visual transition,
-  // animate the newly revealed route after the history traversal commits.
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const hasBrowserTransition = Boolean((event as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition);
-      if (!hasBrowserTransition) document.documentElement.dataset.navigationDirection = 'back';
-    };
-    window.addEventListener('popstate', handlePopState, true);
-    return () => window.removeEventListener('popstate', handlePopState, true);
-  }, []);
 
   useEffect(() => {
     const handleInstallPrompt = (event: Event) => {
