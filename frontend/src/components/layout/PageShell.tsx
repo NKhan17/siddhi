@@ -2,12 +2,14 @@
 
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Menu, LogOut, ChevronDown, ArrowLeft, Download } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../../app/AuthContext';
 import { api } from '../../lib/api';
 import { Sidebar } from './Sidebar';
 import { initials } from '../../lib/utils';
-import { withViewTransition } from '../../lib/navigation';
+import { navigateTo } from '../../lib/navigation';
+import { queryClient } from '../../lib/query-client';
+import type { User } from '../../types';
 
 interface PageShellProps { children: React.ReactNode }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
@@ -58,9 +60,8 @@ const sectionNames: Array<[RegExp, string]> = [
 ];
 
 export function PageShell({ children }: PageShellProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const pageTitle = sectionNames.find(([pattern]) => pattern.test(pathname))?.[1] ?? 'Workspace';
@@ -140,7 +141,7 @@ export function PageShell({ children }: PageShellProps) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <button className="absolute inset-0 bg-ink/35" onClick={closeMobileNavigation} aria-label="Close navigation overlay" />
-          <div id="mobile-main-navigation" className="relative z-10 h-full"><Sidebar mobile onNavigate={closeMobileNavigation} onClose={closeMobileNavigation} /></div>
+          <div id="mobile-main-navigation" className="relative z-10 h-full"><Sidebar mobile onNavigate={() => setMobileOpen(false)} onClose={closeMobileNavigation} /></div>
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
@@ -149,8 +150,8 @@ export function PageShell({ children }: PageShellProps) {
             <button
               onClick={() => {
                 const fallback = pathname.startsWith('/students/') ? `/students/${pathname.split('/')[2]}` : user?.active_role === 'guardian' ? '/guardian' : '/staff';
-                if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) withViewTransition(() => router.back(), 'back');
-                else withViewTransition(() => router.push(fallback), 'back');
+                if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) window.history.back();
+                else navigateTo(fallback, { direction: 'back' });
               }}
               className="hidden rounded-full border border-ink/20 p-2 text-ink transition-colors hover:bg-gallery-white md:inline-flex"
               aria-label="Go back"
@@ -172,8 +173,10 @@ export function PageShell({ children }: PageShellProps) {
                     aria-label="Switch workspace role"
                     value={user.active_role}
                     onChange={async (event) => {
-                      await api.post('/auth/select-role', { role: event.target.value, school_id: user.active_school_id });
-                      window.location.reload();
+                      const selected = await api.post<User>('/auth/select-role', { role: event.target.value, school_id: user.active_school_id });
+                      queryClient.clear();
+                      login(selected);
+                      navigateTo(selected.landing_route, { replace: true, transition: false });
                     }}
                     className="max-w-[150px] appearance-none bg-transparent pr-4 text-xs font-medium capitalize text-ink outline-none"
                   >
@@ -182,7 +185,7 @@ export function PageShell({ children }: PageShellProps) {
                   <ChevronDown size={13} />
                 </label>
               )}
-              <button onClick={() => withViewTransition(() => router.push('/profile'), 'forward')} className="flex items-center gap-2 rounded-full p-1.5 pr-2 text-left transition-colors hover:bg-gallery-white" aria-label="Open my profile">
+              <button onClick={() => navigateTo('/profile', { direction: 'forward' })} className="flex items-center gap-2 rounded-full p-1.5 pr-2 text-left transition-colors hover:bg-gallery-white" aria-label="Open my profile">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 bg-soft-linen text-xs font-medium text-ink">{initials(user.full_name)}</span>
                 <span className="hidden max-w-[155px] sm:block">
                   <span className="block truncate text-xs font-medium text-ink">{user.full_name}</span>

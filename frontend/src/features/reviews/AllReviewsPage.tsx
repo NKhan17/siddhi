@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 import { Link } from '../../lib/navigation';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, StatusBadge } from '../../components/ui';
 import { formatDate } from '../../lib/utils';
+import { useAuth } from '../../app/AuthContext';
 
 type Review = {
   id: string; student_id: string; student_name: string; grade_class: string; academic_year: string;
@@ -14,13 +15,14 @@ type Review = {
 
 export default function AllReviewsPage() {
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useQuery<Review[]>({ queryKey: ['school-reviews'], queryFn: () => api.get('/reviews') });
+  const { user } = useAuth();
+  const { data, isLoading, error } = useQuery<Review[]>({ queryKey: ['school-reviews', user?.active_role ?? 'unknown'], queryFn: () => api.get('/reviews') });
   return (
     <>
       <div className="mx-auto max-w-5xl">
         <PageHeader title="IEP Reviews & Approvals" subtitle="Review schedule and approval status across your students" />
         {isLoading && <LoadingState />}
-        {error && <ErrorState message="Unable to load school reviews." onRetry={() => queryClient.invalidateQueries({ queryKey: ['school-reviews'] })} />}
+        {error && <ErrorState message="Unable to load school reviews." onRetry={() => queryClient.invalidateQueries({ queryKey: ['school-reviews', user?.active_role ?? 'unknown'] })} />}
         {data && data.length === 0 && <EmptyState title="No reviews scheduled yet" description="Scheduled IEP reviews will appear here across your assigned students." />}
         <div className="space-y-3">
           {data?.map(review => {

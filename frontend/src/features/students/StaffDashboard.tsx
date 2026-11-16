@@ -10,7 +10,7 @@ export default function StaffDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery<ReportsSummary>({
-    queryKey: ['reports-summary'],
+    queryKey: ['reports-summary', user?.active_role ?? 'unknown'],
     queryFn: () => api.get('/reports/summary'),
   });
 

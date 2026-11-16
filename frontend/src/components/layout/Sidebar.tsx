@@ -1,12 +1,12 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import {
   Users, Calendar,
   ClipboardCheck, BarChart2, UserRound,
   X, LayoutDashboard,
 } from 'lucide-react';
-import { NavLink } from '../../lib/navigation';
+import { NavLink, preloadNavigationChunk } from '../../lib/navigation';
 import { useAuth } from '../../app/AuthContext';
 import type { Role } from '../../types';
 
@@ -61,6 +61,18 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
   if (!user) return null;
 
   const navItems = getNavItems(user.active_role);
+  useEffect(() => {
+    // Warm the compact route chunks during idle time so the first tab switch
+    // does not need to wait for JavaScript download/parse. Data stays demand-prefetched.
+    const warm = () => navItems.forEach(item => preloadNavigationChunk(item.to));
+    const idleWindow = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number; cancelIdleCallback?: (handle: number) => void };
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(warm, { timeout: 1200 });
+      return () => idleWindow.cancelIdleCallback?.(handle);
+    }
+    const handle = window.setTimeout(warm, 200);
+    return () => window.clearTimeout(handle);
+  }, [user.active_role]);
   return (
     <aside
       className={mobile
@@ -90,6 +102,7 @@ export function Sidebar({ mobile = false, onNavigate, onClose }: SidebarProps) {
             key={`${item.label}-${item.to}`}
             to={item.to}
             onClick={onNavigate}
+            replaceNavigation={mobile}
             title={item.label}
             aria-label={item.label}
             className={({ isActive }) => mobile

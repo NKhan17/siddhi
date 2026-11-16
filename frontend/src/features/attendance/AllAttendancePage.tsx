@@ -6,6 +6,7 @@ import { Plus, Search } from 'lucide-react';
 import { api } from '../../lib/api';
 import { PageHeader, Card, LoadingState, ErrorState, EmptyState, Button, Modal, Field, Input, Select, StatusBadge, DataTable } from '../../components/ui';
 import { formatDate, todayISODate } from '../../lib/utils';
+import { useAuth } from '../../app/AuthContext';
 
 type StudentAttendance = {
   student_id: string; full_name: string; grade_class: string; disability_category: string;
@@ -19,6 +20,7 @@ type AttendanceData = { students: StudentAttendance[]; records: AttendanceRow[] 
 
 export default function AllAttendancePage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [studentId, setStudentId] = useState('');
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().slice(0, 10));
@@ -31,7 +33,7 @@ export default function AllAttendancePage() {
   const today = todayISODate();
 
   const { data, isLoading, error } = useQuery<AttendanceData>({
-    queryKey: ['school-attendance', fromDate, toDate],
+    queryKey: ['school-attendance', user?.active_role ?? 'unknown', fromDate, toDate],
     queryFn: () => api.get('/attendance', { from_date: fromDate || undefined, to_date: toDate || undefined }),
   });
   const students = data?.students ?? [];

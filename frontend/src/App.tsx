@@ -1,38 +1,45 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { Suspense, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { usePathname } from 'next/navigation';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/query-client';
+import { navigateTo } from './lib/navigation';
 import { AuthProvider, useAuth } from './app/AuthContext';
 import { ProtectedRoute } from './app/ProtectedRoute';
 import LoginPage from './features/auth/LoginPage';
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
 import ResetPasswordPage from './features/auth/ResetPasswordPage';
-import GuardianDashboard from './features/guardian/GuardianDashboard';
-import ProfilePage from './features/profile/ProfilePage';
-import StaffDashboard from './features/students/StaffDashboard';
-import StudentsListPage from './features/students/StudentsListPage';
-import StudentProfilePage from './features/students/StudentProfilePage';
-import StudentEditPage from './features/students/StudentEditPage';
-import PLOPPage from './features/plop/PLOPPage';
-import IEPPage from './features/iep/IEPPage';
-import ProgressPage from './features/progress/ProgressPage';
-import TherapyPage from './features/therapy/TherapyPage';
-import AccommodationsPage from './features/accommodations/AccommodationsPage';
-import CommunicationsPage from './features/communications/CommunicationsPage';
-import AssessmentsPage from './features/assessments/AssessmentsPage';
-import AttendancePage from './features/attendance/AttendancePage';
-import AllAttendancePage from './features/attendance/AllAttendancePage';
-import ReviewsPage from './features/reviews/ReviewsPage';
-import AllReviewsPage from './features/reviews/AllReviewsPage';
-import ReportsPage from './features/reports/ReportsPage';
 import { PageShell } from './components/layout/PageShell';
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
+function RouteChunkLoading() {
+  return <div className="flex min-h-[35vh] items-center justify-center text-sm text-graphite" role="status" aria-live="polite">Loading workspace…</div>;
+}
+
+// Keep the initial workspace bundle small. Feature modules are loaded only when
+// their route is opened (and are warmed by prefetchNavigation on hover/touch).
+const GuardianDashboard = dynamic(() => import('./features/guardian/GuardianDashboard'), { loading: RouteChunkLoading });
+const ProfilePage = dynamic(() => import('./features/profile/ProfilePage'), { loading: RouteChunkLoading });
+const StaffDashboard = dynamic(() => import('./features/students/StaffDashboard'), { loading: RouteChunkLoading });
+const StudentsListPage = dynamic(() => import('./features/students/StudentsListPage'), { loading: RouteChunkLoading });
+const StudentProfilePage = dynamic(() => import('./features/students/StudentProfilePage'), { loading: RouteChunkLoading });
+const StudentEditPage = dynamic(() => import('./features/students/StudentEditPage'), { loading: RouteChunkLoading });
+const PLOPPage = dynamic(() => import('./features/plop/PLOPPage'), { loading: RouteChunkLoading });
+const IEPPage = dynamic(() => import('./features/iep/IEPPage'), { loading: RouteChunkLoading });
+const ProgressPage = dynamic(() => import('./features/progress/ProgressPage'), { loading: RouteChunkLoading });
+const TherapyPage = dynamic(() => import('./features/therapy/TherapyPage'), { loading: RouteChunkLoading });
+const AccommodationsPage = dynamic(() => import('./features/accommodations/AccommodationsPage'), { loading: RouteChunkLoading });
+const CommunicationsPage = dynamic(() => import('./features/communications/CommunicationsPage'), { loading: RouteChunkLoading });
+const AssessmentsPage = dynamic(() => import('./features/assessments/AssessmentsPage'), { loading: RouteChunkLoading });
+const AttendancePage = dynamic(() => import('./features/attendance/AttendancePage'), { loading: RouteChunkLoading });
+const AllAttendancePage = dynamic(() => import('./features/attendance/AllAttendancePage'), { loading: RouteChunkLoading });
+const ReviewsPage = dynamic(() => import('./features/reviews/ReviewsPage'), { loading: RouteChunkLoading });
+const AllReviewsPage = dynamic(() => import('./features/reviews/AllReviewsPage'), { loading: RouteChunkLoading });
+const ReportsPage = dynamic(() => import('./features/reports/ReportsPage'), { loading: RouteChunkLoading });
 
 function RouteContent() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, isLoading } = useAuth();
   const studentRoute = pathname.match(/^\/students\/([^/]+)(?:\/(plop|iep|progress|therapy|accommodations|communications|assessments|attendance|reviews|edit))?$/);
   const studentId = studentRoute?.[1];
@@ -40,18 +47,19 @@ function RouteContent() {
 
   useEffect(() => {
     if (isLoading) return;
-    if (pathname === '/' && !user) router.replace('/login');
-    else if (pathname === '/' && user) router.replace(user.landing_route);
-    else if (!['/login','/forgot-password','/reset-password'].includes(pathname) && !user) router.replace('/login');
-  }, [pathname, user, isLoading, router]);
+    if (pathname === '/' && !user) navigateTo('/login', { replace: true, transition: false });
+    else if (pathname === '/' && user) navigateTo(user.landing_route, { replace: true, transition: false });
+    else if (!['/login','/forgot-password','/reset-password'].includes(pathname) && !user) navigateTo('/login', { replace: true, transition: false });
+  }, [pathname, user, isLoading]);
 
-  if (isLoading && pathname !== '/login') return <div className="min-h-screen flex items-center justify-center text-slate-gray">Loading…</div>;
+  if (isLoading && pathname !== '/login') return <RouteChunkLoading />;
   if (pathname === '/login') return <LoginPage />;
   if (pathname === '/forgot-password') return <ForgotPasswordPage />;
   if (pathname === '/reset-password') return <ResetPasswordPage />;
   if (!user) return null;
   if (pathname === '/guardian') return <ProtectedRoute allowedRoles={['guardian']}><GuardianDashboard /></ProtectedRoute>;
   if (pathname === '/profile' || pathname === '/guardian/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
+  if (pathname === '/reports') return <ProtectedRoute><ReportsPage /></ProtectedRoute>;
   if (pathname === '/staff') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StaffDashboard /></ProtectedRoute>;
   if (pathname === '/attendance') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllAttendancePage /></ProtectedRoute>;
   if (pathname === '/reviews') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllReviewsPage /></ProtectedRoute>;
@@ -67,8 +75,7 @@ function RouteContent() {
   if (studentId && section === 'assessments') return <ProtectedRoute><AssessmentsPage /></ProtectedRoute>;
   if (studentId && section === 'attendance') return <ProtectedRoute><AttendancePage /></ProtectedRoute>;
   if (studentId && section === 'reviews') return <ProtectedRoute><ReviewsPage /></ProtectedRoute>;
-  if (pathname === '/reports') return <ProtectedRoute><ReportsPage /></ProtectedRoute>;
-  return <div className="py-12"><h1 className="font-display text-4xl">Page not found</h1><button className="mt-4 rounded-full border border-ink px-5 py-2 text-sm hover:bg-gallery-white" onClick={() => router.push(user.landing_route)}>Return to dashboard</button></div>;
+  return <div className="py-12"><h1 className="font-display text-4xl">Page not found</h1><button className="mt-4 rounded-full border border-ink px-5 py-2 text-sm hover:bg-gallery-white" onClick={() => navigateTo(user.landing_route)}>Return to dashboard</button></div>;
 }
 
 function AppFrame() {

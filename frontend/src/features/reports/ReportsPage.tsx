@@ -25,7 +25,7 @@ export default function ReportsPage() {
   const [includeGuardianContact, setIncludeGuardianContact] = useState(false);
 
   const { data: summary, isLoading, error } = useQuery<ReportsSummary>({
-    queryKey: ['reports-summary'],
+    queryKey: ['reports-summary', user?.active_role ?? 'unknown'],
     queryFn: () => api.get('/reports/summary'),
   });
 
