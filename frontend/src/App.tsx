@@ -19,6 +19,7 @@ function RouteChunkLoading() {
 
 // Keep the initial workspace bundle small. Feature modules are loaded only when
 // their route is opened (and are warmed by prefetchNavigation on hover/touch).
+const StudentDashboard = dynamic(() => import('./features/student/StudentDashboard'), { loading: RouteChunkLoading });
 const GuardianDashboard = dynamic(() => import('./features/guardian/GuardianDashboard'), { loading: RouteChunkLoading });
 const ProfilePage = dynamic(() => import('./features/profile/ProfilePage'), { loading: RouteChunkLoading });
 const StaffDashboard = dynamic(() => import('./features/students/StaffDashboard'), { loading: RouteChunkLoading });
@@ -57,9 +58,10 @@ function RouteContent() {
   if (pathname === '/forgot-password') return <ForgotPasswordPage />;
   if (pathname === '/reset-password') return <ResetPasswordPage />;
   if (!user) return null;
+  if (pathname === '/student') return <ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>;
   if (pathname === '/guardian') return <ProtectedRoute allowedRoles={['guardian']}><GuardianDashboard /></ProtectedRoute>;
-  if (pathname === '/profile' || pathname === '/guardian/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
-  if (pathname === '/reports') return <ProtectedRoute><ReportsPage /></ProtectedRoute>;
+  if (pathname === '/profile' || pathname === '/guardian/profile') return <ProtectedRoute allowedRoles={['guardian','special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><ProfilePage /></ProtectedRoute>;
+  if (pathname === '/reports') return <ProtectedRoute allowedRoles={['guardian','special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><ReportsPage /></ProtectedRoute>;
   if (pathname === '/staff') return <ProtectedRoute allowedRoles={['special_educator','therapist','psychologist','psychiatrist','school_head','school_admin']}><StaffDashboard /></ProtectedRoute>;
   if (pathname === '/attendance') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllAttendancePage /></ProtectedRoute>;
   if (pathname === '/reviews') return <ProtectedRoute allowedRoles={['special_educator','school_head','school_admin']}><AllReviewsPage /></ProtectedRoute>;

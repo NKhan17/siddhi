@@ -52,7 +52,7 @@ if (typeof window !== 'undefined') {
 }
 
 const sectionNames: Array<[RegExp, string]> = [
-  [/^\/guardian$/, 'Family overview'], [/^\/profile$/, 'My profile'], [/^\/guardian\/profile$/, 'My profile'],
+  [/^\/guardian$/, 'Family overview'], [/^\/student$/, 'Student portal'], [/^\/profile$/, 'My profile'], [/^\/guardian\/profile$/, 'My profile'],
   [/^\/staff$/, 'Dashboard'], [/^\/students$/, 'Students'], [/^\/attendance$/, 'School attendance'], [/^\/reviews$/, 'IEP reviews'], [/^\/students\/[^/]+$/, 'Student profile'], [/^\/reports$/, 'Reports'],
   [/\/plop$/, 'Present level of performance'], [/\/iep$/, 'IEP plan'], [/\/progress$/, 'Progress'],
   [/\/therapy$/, 'Therapy'], [/\/accommodations$/, 'Accommodations'], [/\/communications$/, 'Communications'],
@@ -149,7 +149,7 @@ export function PageShell({ children }: PageShellProps) {
           <div className="flex min-w-0 items-center gap-2">
             <button
               onClick={() => {
-                const fallback = pathname.startsWith('/students/') ? `/students/${pathname.split('/')[2]}` : user?.active_role === 'guardian' ? '/guardian' : '/staff';
+                const fallback = pathname.startsWith('/students/') ? `/students/${pathname.split('/')[2]}` : user?.active_role === 'guardian' ? '/guardian' : user?.active_role === 'student' ? '/student' : '/staff';
                 if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) window.history.back();
                 else navigateTo(fallback, { direction: 'back' });
               }}

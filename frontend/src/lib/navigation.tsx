@@ -74,6 +74,7 @@ export function withViewTransition(update: () => void, direction: NavigationDire
 const featurePreloaders: Record<string, () => Promise<unknown>> = {
   '/staff': () => import('../features/students/StaffDashboard'),
   '/guardian': () => import('../features/guardian/GuardianDashboard'),
+  '/student': () => import('../features/student/StudentDashboard'),
   '/students': () => import('../features/students/StudentsListPage'),
   '/reports': () => import('../features/reports/ReportsPage'),
   '/attendance': () => import('../features/attendance/AllAttendancePage'),
@@ -143,6 +144,9 @@ export function prefetchNavigation(path: string, role?: Role | null) {
       break;
     case '/guardian':
       void queryClient.prefetchQuery({ queryKey: ['guardian-children'], queryFn: () => api.get('/guardians/me/children') });
+      break;
+    case '/student':
+      void queryClient.prefetchQuery({ queryKey: ['student-self-profile'], queryFn: () => api.get('/student/me') });
       break;
     case '/profile':
       if (role === 'guardian') void queryClient.prefetchQuery({ queryKey: ['guardian-profile'], queryFn: () => api.get('/guardians/me/profile') });

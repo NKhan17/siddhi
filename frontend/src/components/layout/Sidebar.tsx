@@ -18,10 +18,13 @@ interface NavItem {
 
 function getNavItems(role: Role): NavItem[] {
   const profile: NavItem = { label: 'My profile', to: '/profile', icon: <UserRound size={20} strokeWidth={1.7} /> };
-  const dashboard: NavItem = { label: 'Dashboard', to: role === 'guardian' ? '/guardian' : '/staff', icon: <LayoutDashboard size={20} strokeWidth={1.7} /> };
+  const dashboard: NavItem = { label: 'Dashboard', to: role === 'guardian' ? '/guardian' : role === 'student' ? '/student' : '/staff', icon: <LayoutDashboard size={20} strokeWidth={1.7} /> };
   let items: NavItem[];
 
   switch (role) {
+    case 'student':
+      items = [dashboard];
+      break;
     case 'guardian':
       items = [dashboard, { label: 'Reports', to: '/reports', icon: <BarChart2 size={20} strokeWidth={1.7} /> }];
       break;
@@ -47,7 +50,7 @@ function getNavItems(role: Role): NavItem[] {
       items = [dashboard];
   }
 
-  return [...items, profile];
+  return role === 'student' ? items : [...items, profile];
 }
 
 interface SidebarProps {

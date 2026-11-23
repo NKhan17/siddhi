@@ -50,6 +50,7 @@ students
 | `code` | `VARCHAR(50)` | no | Unique indexed school code |
 | `address` | `TEXT` | yes | Address |
 | `is_active` | `BOOLEAN` | no | Defaults `true` |
+| `login_user_id` | `UUID` | yes | Unique FK `users.id`, `SET NULL`; optional student portal login |
 | `created_at` | `TIMESTAMPTZ` | no | Creation time |
 
 ### `users`

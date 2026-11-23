@@ -22,11 +22,13 @@ export async function requireActor(roles?: string[]) {
 async function studentAccess(actor: Actor, studentId: string, write = false) {
   const db = database();
   const found = await db.query<Row>(
-    'SELECT id, school_id FROM students WHERE id = $1 AND school_id = $2 AND is_active = TRUE',
+    'SELECT id, school_id, login_user_id FROM students WHERE id = $1 AND school_id = $2 AND is_active = TRUE',
     [studentId, actor.active_school_id],
   );
   if (!found.rows[0]) fail(404, 'Student not found or access denied');
-  if (actor.active_role === 'guardian') {
+  if (actor.active_role === 'student') {
+    if (write || found.rows[0].login_user_id !== actor.id) fail(403, 'Students can only view their own profile');
+  } else if (actor.active_role === 'guardian') {
     if (write) fail(403, 'Guardians cannot modify student records directly');
     const link = await db.query('SELECT 1 FROM guardian_student_links WHERE guardian_user_id=$1 AND student_id=$2 AND school_id=$3 AND is_active=TRUE', [actor.id, studentId, actor.active_school_id]);
     if (!link.rowCount) fail(403, 'Access denied: student is not linked to your guardian account');
@@ -71,6 +73,16 @@ export async function getData(path: string[], request: Request): Promise<any> {
   const school = actor.active_school_id;
   const id = path[1];
   const query = new URL(request.url).searchParams;
+
+  if (role === 'student') {
+    if (path[0] !== 'student' || path[1] !== 'me' || path.length !== 2) fail(403, 'Student accounts can only access their own profile');
+    const student = await one(
+      'SELECT s.id,s.full_name,s.admission_number,s.grade_class,s.date_of_birth,s.strengths,s.learning_style,s.languages_known,s.assistive_devices FROM students s WHERE s.login_user_id=$1 AND s.school_id=$2 AND s.is_active=TRUE LIMIT 1',
+      [actor.id, school],
+    );
+    if (!student) fail(404, 'Student profile not found');
+    return student;
+  }
 
   if (path[0] === 'students' && path.length === 1) {
     if (role === 'guardian') fail(403, 'Guardians cannot list all students');
@@ -202,6 +214,7 @@ export async function getData(path: string[], request: Request): Promise<any> {
 
 export async function postData(path: string[], body: Record<string, any>) {
   const actor = await requireActor();
+  if (actor.active_role === 'student') fail(403, 'Student accounts are read-only');
   const db = database();
   const school = actor.active_school_id;
   const id = path[1];
@@ -338,6 +351,7 @@ export async function postData(path: string[], body: Record<string, any>) {
 
 export async function patchData(path: string[], body: Record<string, any>) {
   const actor = await requireActor();
+  if (actor.active_role === 'student') fail(403, 'Student accounts are read-only');
   const school = actor.active_school_id;
   const role = actor.active_role;
   const id = path[1];
@@ -397,6 +411,7 @@ export async function patchData(path: string[], body: Record<string, any>) {
 
 export async function exportWorkbook(body: Record<string, any>) {
   const actor = await requireActor();
+  if (actor.active_role === 'student') fail(403, 'Student accounts cannot export school records');
   const role = actor.active_role;
   const school = actor.active_school_id;
   assertDateRange(body.from_date, body.to_date, 'Export date range');

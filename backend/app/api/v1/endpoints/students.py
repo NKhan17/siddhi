@@ -60,8 +60,8 @@ def list_students(
     ctx: AuthContext = Depends(get_current_user_context),
     db: Session = Depends(get_db),
 ):
-    if ctx.active_role == "guardian":
-        raise HTTPException(status_code=403, detail="Guardians cannot list all students")
+    if ctx.active_role in ("guardian", "student"):
+        raise HTTPException(status_code=403, detail="This account cannot list all students")
 
     q = db.query(Student).filter(
         Student.school_id == ctx.active_school_id,

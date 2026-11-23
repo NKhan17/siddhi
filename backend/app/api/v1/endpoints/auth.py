@@ -11,7 +11,7 @@ from app.core.security import (
 from app.core.audit import record_audit_log
 from app.core.permissions import get_current_user_context, AuthContext
 from app.models.entities import (
-    User, SchoolMembership, UserSession, PasswordResetToken, School
+    User, SchoolMembership, UserSession, PasswordResetToken, School, Student
 )
 from app.schemas.auth import (
     LoginRequest, LoginResponse, TokenResponse, UserProfileResponse,
@@ -36,7 +36,7 @@ def build_user_profile(user: User, active_school_id: uuid.UUID, active_role: str
         if m.school_id == active_school_id:
             roles.append(m.role)
 
-    landing_route = "/guardian" if active_role == "guardian" else "/staff"
+    landing_route = {"guardian": "/guardian", "student": "/student"}.get(active_role, "/staff")
 
     return UserProfileResponse(
         id=user.id,
@@ -55,10 +55,16 @@ def build_user_profile(user: User, active_school_id: uuid.UUID, active_role: str
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, response: Response, db: Session = Depends(get_db)):
     identifier = request.identifier.strip()
+    student_record = None
     if request.client_mode == "guardian":
         user = db.query(User).filter(User.email == identifier.lower()).first()
-    else:
+    elif request.client_mode == "student":
+        student_record = db.query(Student).filter(Student.admission_number == identifier.upper(), Student.is_active.is_(True)).first()
+        user = db.query(User).filter(User.id == student_record.login_user_id, User.is_active.is_(True)).first() if student_record and student_record.login_user_id else None
+    elif request.client_mode == "staff":
         user = db.query(User).filter(User.faculty_id == identifier.upper()).first()
+    else:
+        user = None
 
     # Generic invalid login response to prevent email enumeration
     generic_error = HTTPException(
@@ -96,10 +102,16 @@ def login(request: LoginRequest, response: Response, db: Session = Depends(get_d
     target_school_id = None
 
     if request.client_mode == "guardian":
-        guardian_mems = [m for m in memberships if m.role == "guardian"]
-        if guardian_mems:
-            target_role = "guardian"
-            target_school_id = guardian_mems[0].school_id
+        matching_mems = [m for m in memberships if m.role == "guardian"]
+        target_role = "guardian" if matching_mems else None
+        target_school_id = matching_mems[0].school_id if matching_mems else None
+    elif request.client_mode == "student":
+        matching_mems = [m for m in memberships if m.role == "student" and student_record and m.school_id == student_record.school_id]
+        target_role = "student" if matching_mems else None
+        target_school_id = matching_mems[0].school_id if matching_mems else None
+
+    if request.client_mode in ("guardian", "student") and not target_role:
+        raise generic_error
 
     if not target_role:
         # Default to first available membership

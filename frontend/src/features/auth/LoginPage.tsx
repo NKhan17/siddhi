@@ -9,12 +9,12 @@ import type { LoginResponse } from '../../types';
 import { Button, Field, Input } from '../../components/ui';
 
 const schema = z.object({
-  identifier: z.string().min(3, 'Enter your faculty ID'),
+  identifier: z.string().min(3, 'Enter your login ID'),
   password: z.string().min(1, 'Password is required'),
 });
 type FormValues = z.infer<typeof schema>;
 
-type LoginMode = 'guardian' | 'staff';
+type LoginMode = 'guardian' | 'staff' | 'student';
 
 export default function LoginPage() {
   const [mode, setMode] = useState<LoginMode>('staff');
@@ -57,7 +57,7 @@ export default function LoginPage() {
           role="group"
           aria-label="Login type"
         >
-          {(['staff', 'guardian'] as LoginMode[]).map((m) => (
+          {(['staff', 'guardian', 'student'] as LoginMode[]).map((m) => (
             <button
               key={m}
               type="button"
@@ -68,24 +68,24 @@ export default function LoginPage() {
                   : 'text-slate-gray hover:text-ink-black'
               }`}
             >
-              {m === 'staff' ? 'School Staff' : 'Guardian'}
+              {m === 'staff' ? 'School Staff' : m === 'guardian' ? 'Guardian' : 'Student'}
             </button>
           ))}
         </div>
 
         <div className="bg-white border border-stone-border rounded-lg p-6">
           <h1 className="text-lg font-medium text-ink-black mb-1">
-            {mode === 'guardian' ? 'Sign in as Guardian' : 'Sign in as School Staff'}
+            {mode === 'guardian' ? 'Sign in as Guardian' : mode === 'student' ? 'Sign in as Student' : 'Sign in as School Staff'}
           </h1>
           <p className="text-sm text-slate-gray mb-5">
             {mode === 'guardian'
               ? "Access your children's IEP records and progress."
-              : 'Manage IEP plans, goals, and student progress.'}
+              : mode === 'student' ? "Sign in to view your student profile." : 'Manage IEP plans, goals, and student progress.'}
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <Field
-              label={mode === 'guardian' ? 'Email address' : 'Faculty ID'}
+              label={mode === 'guardian' ? 'Email address' : mode === 'student' ? 'Admission number' : 'Faculty ID'}
               htmlFor="identifier"
               error={errors.identifier?.message}
               required
@@ -94,7 +94,7 @@ export default function LoginPage() {
                 id="identifier"
                 type={mode === 'guardian' ? 'email' : 'text'}
                 autoComplete={mode === 'guardian' ? 'email' : 'username'}
-                placeholder={mode === 'guardian' ? 'you@example.com' : 'FAC-0001'}
+                placeholder={mode === 'guardian' ? 'you@example.com' : mode === 'student' ? 'ADM-2026-001' : 'FAC-0001'}
                 error={!!errors.identifier}
                 {...register('identifier')}
               />

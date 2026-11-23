@@ -103,4 +103,32 @@ describe('Next.js data API authorization', () => {
     expect(query.mock.calls[3][0]).toContain('guardian_user_id IS NULL');
   });
 
+  it("returns only the authenticated student's own portal profile", async () => {
+    currentUserMock.mockResolvedValue({ ...actor('student'), landing_route: '/student' });
+    const query = vi.fn().mockResolvedValue({ rows: [{ id: 'student-1', full_name: 'Aarav Patel', admission_number: 'ADM-2026-001', grade_class: 'Grade 3-B' }], rowCount: 1 });
+    databaseMock.mockReturnValue({ query } as never);
+    const result = await getData(['student', 'me'], new Request('https://siddhi.test/api/v1/student/me'));
+    expect(result.full_name).toBe('Aarav Patel');
+    expect(query.mock.calls[0][0]).toContain('s.login_user_id=$1');
+    expect(query.mock.calls[0][1]).toEqual(['user-1', 'school-1']);
+  });
+
+  it('prevents student accounts from listing the school roster', async () => {
+    currentUserMock.mockResolvedValue({ ...actor('student'), landing_route: '/student' });
+    const query = vi.fn();
+    databaseMock.mockReturnValue({ query } as never);
+    await expect(getData(['students'], new Request('https://siddhi.test/api/v1/students')))
+      .rejects.toMatchObject({ status: 403, message: 'Student accounts can only access their own profile' });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('keeps student accounts read-only', async () => {
+    currentUserMock.mockResolvedValue({ ...actor('student'), landing_route: '/student' });
+    const query = vi.fn();
+    databaseMock.mockReturnValue({ query } as never);
+    await expect(postData(['students', 'student-1', 'plop'], {}))
+      .rejects.toMatchObject({ status: 403, message: 'Student accounts are read-only' });
+    expect(query).not.toHaveBeenCalled();
+  });
+
 });

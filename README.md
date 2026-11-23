@@ -47,7 +47,7 @@ Open `http://localhost:3000/login`. There is no FastAPI server to start; Next.js
 
 ## Demo accounts and seed data (synthetic; local development only)
 
-The demo seed provisions one school, nine login accounts, five student profiles, guardian links, staff assignments, and sample IEP/therapy/assessment/progress records. Run it after applying migrations:
+The demo seed provisions one school, ten login accounts, five student profiles, guardian links, staff assignments, and sample IEP/therapy/assessment/progress records. Run it after applying migrations:
 
 ```bash
 python -m venv .venv
@@ -57,7 +57,7 @@ cd backend
 ../.venv/bin/python -m app.seed_demo
 ```
 
-Open `http://localhost:3000/login`. Staff select **School Staff** and sign in with the faculty ID; guardians select **Guardian** and sign in with their email address. All passwords below are synthetic local-development credentials.
+Open `http://localhost:3000/login`. Staff select **School Staff** and sign in with the faculty ID; guardians select **Guardian** and sign in with their email address; students select **Student** and sign in with their admission number. All passwords below are synthetic local-development credentials.
 
 ### School staff accounts
 
@@ -78,9 +78,17 @@ Open `http://localhost:3000/login`. Staff select **School Staff** and sign in wi
 | Sunita Patel | `guardian.single@siddhi.test` | `555-0107` | Aarav Patel (one child) | `SiddhiGuardian2026!` |
 | Meera Iyer | `guardian.multi@siddhi.test` | `555-0108` | Diya Iyer and Vivaan Iyer (two children) | `SiddhiGuardian2026!` |
 
+### Student demo login
+
+| Student | Login mode | Admission number | Password |
+|---|---|---|---|
+| Aarav Patel | Student | ADM-2026-001 | SiddhiStudent2026! |
+
+The account is linked to Aarav's existing synthetic student record. It opens a read-only student portal and exposes only student-facing profile details.
+
 ### Seeded student profiles
 
-These five student records are created by the seed and can be opened from staff dashboards or their linked guardian accounts. **Students do not have login usernames or passwords**: the current application defines staff and guardian authentication, not a student login role.
+These five student records are created by the seed and can be opened from staff dashboards or their linked guardian accounts.
 
 | Student | Admission number | Date of birth | Grade / class | Disability category | Linked guardian |
 |---|---|---|---|---|---|
@@ -96,7 +104,7 @@ These five student records are created by the seed and can be opened from staff 
 - **Single-child guardian layout:** sign in as `guardian.single@siddhi.test`.
 - **Multi-child guardian layout:** sign in as `guardian.multi@siddhi.test`.
 - **Staff dashboards and role-specific views:** use the corresponding staff account above.
-- **Student detail and IEP sections:** open any student assigned to the signed-in staff member or linked to the guardian.
+- **Student portal:** sign in using the student admission number and password above.
 
 The accounts and records are synthetic. Never use these credentials on the production site. Running the seed is intended for a local/test database only; it resets the passwords of these reserved `.test` demo users to the values documented above.
 

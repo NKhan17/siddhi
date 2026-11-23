@@ -28,6 +28,7 @@ def seed_database():
                 ("psychiatrist@siddhi.test", "Dr. Kavita Rao (Psychiatrist)", "SiddhiPsychiatrist2026!", "555-0109", "FAC-PSYCH-001", "psychiatrist"),
                 ("guardian.single@siddhi.test", "Sunita Patel", "SiddhiGuardian2026!", "555-0107", None, "guardian"),
                 ("guardian.multi@siddhi.test", "Meera Iyer", "SiddhiGuardian2026!", "555-0108", None, "guardian"),
+                ("aarav.student@siddhi.test", "Aarav Patel", "SiddhiStudent2026!", "555-0111", None, "student"),
             ]
             users = {}
             for email, name, password, phone, faculty_id, role in accounts:
@@ -68,6 +69,9 @@ def seed_database():
                 db.flush()
                 students[admission] = student
 
+            aarav_student_user = users["aarav.student@siddhi.test"]
+            students["ADM-2026-001"].login_user_id = aarav_student_user.id
+
             links = [("guardian.single@siddhi.test", "ADM-2026-001"), ("guardian.multi@siddhi.test", "ADM-2026-002"), ("guardian.multi@siddhi.test", "ADM-2026-003")]
             for email, admission in links:
                 guardian, student = users[email], students[admission]
@@ -86,7 +90,7 @@ def seed_database():
                 else:
                     assignment.is_active = True
             db.commit()
-            print("Demo seed refreshed: 9 login accounts, 5 student profiles, guardian links and staff assignments.")
+            print("Demo seed refreshed: 10 login accounts, 5 student profiles, guardian links and staff assignments.")
             return
 
         print("Seeding synthetic demo records into PostgreSQL...")
@@ -159,6 +163,9 @@ def seed_database():
         # Guardian with two children
         guardian2_user = make_user("guardian.multi@siddhi.test", "Meera Iyer", "SiddhiGuardian2026!", "555-0108")
         add_membership(guardian2_user.id, "guardian")
+
+        aarav_student_user = make_user("aarav.student@siddhi.test", "Aarav Patel", "SiddhiStudent2026!", "555-0111")
+        add_membership(aarav_student_user.id, "student")
 
         # 3. Students
         # Child 1: Aarav Patel (linked to guardian1)
@@ -267,6 +274,7 @@ def seed_database():
         )
 
         db.add_all([student1, student2, student3, student4, student5])
+        student1.login_user_id = aarav_student_user.id
         db.commit()
 
         # 4. Guardian Links

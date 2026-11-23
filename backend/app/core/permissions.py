@@ -95,6 +95,12 @@ def get_current_user_context(
 
     roles = list({m.role for m in memberships if m.school_id == active_school_id})
 
+    # Student sessions are deliberately confined to the self-service portal and auth lifecycle.
+    if active_role == "student":
+        allowed_paths = ("/api/v1/student/", "/api/v1/auth/me", "/api/v1/auth/logout")
+        if not any(request.url.path.startswith(path) for path in allowed_paths):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Student accounts cannot access this resource")
+
     return AuthContext(
         user=user,
         active_role=active_role,
@@ -138,6 +144,12 @@ def verify_student_access(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Student not found or access denied"
         )
+
+    # Student accounts are bound to one record and are read-only.
+    if context.active_role == "student":
+        if for_write or student.login_user_id != context.user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Students can only view their own profile")
+        return student
 
     # Guardian check
     if context.active_role == "guardian":

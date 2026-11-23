@@ -15,6 +15,7 @@ export interface User {
 
 export type Role =
   | 'guardian'
+  | 'student'
   | 'special_educator'
   | 'therapist'
   | 'psychologist'

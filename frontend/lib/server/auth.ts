@@ -70,23 +70,37 @@ async function profile(user: UserRow, preferredRole?: string, preferredSchoolId?
     active_school_id: selected.school_id,
     roles: [...new Set(memberships.rows.filter((membership) => membership.school_id === selected.school_id).map((membership) => membership.role))],
     memberships: memberships.rows,
-    landing_route: selected.role === 'guardian' ? '/guardian' : '/staff',
+    landing_route: selected.role === 'guardian' ? '/guardian' : selected.role === 'student' ? '/student' : '/staff',
   };
 }
 
 export async function login(identifier: string, password: string, mode: string) {
-  const column = mode === 'guardian' ? 'email' : 'faculty_id';
-  const value = mode === 'guardian' ? identifier.trim().toLowerCase() : identifier.trim().toUpperCase();
-  const result = await database().query<UserRow>(
-    `SELECT id, faculty_id, email, password_hash, full_name, phone, is_active
-     FROM users WHERE ${column} = $1 LIMIT 1`,
-    [value],
-  );
+  const value = identifier.trim();
+  let result;
+  if (mode === 'guardian') {
+    result = await database().query<UserRow>(
+      'SELECT id, faculty_id, email, password_hash, full_name, phone, is_active FROM users WHERE email = $1 LIMIT 1',
+      [value.toLowerCase()],
+    );
+  } else if (mode === 'student') {
+    result = await database().query<UserRow>(
+      'SELECT u.id, u.faculty_id, u.email, u.password_hash, u.full_name, u.phone, u.is_active FROM students s JOIN users u ON u.id = s.login_user_id WHERE upper(s.admission_number) = $1 AND s.is_active = TRUE LIMIT 1',
+      [value.toUpperCase()],
+    );
+  } else if (mode === 'staff') {
+    result = await database().query<UserRow>(
+      'SELECT id, faculty_id, email, password_hash, full_name, phone, is_active FROM users WHERE faculty_id = $1 LIMIT 1',
+      [value.toUpperCase()],
+    );
+  } else {
+    return null;
+  }
   const user = result.rows[0];
   if (!user || !user.is_active || !(await argon2.verify(user.password_hash, password))) {
     return null;
   }
   const selectedProfile = await profile(user, mode);
+  if ((mode === 'guardian' || mode === 'student') && selectedProfile.active_role !== mode) return null;
   const now = new Date();
   const accessToken = await new SignJWT({
     school_id: selectedProfile.active_school_id,

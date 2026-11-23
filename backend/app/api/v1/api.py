@@ -2,13 +2,16 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth, guardian, students, plop, iep, progress, therapy,
     accommodations, communications, assessments, attendance,
-    reviews, reports, exports
+    reviews, reports, exports, student_portal
 )
 
 api_router = APIRouter()
 
 # Auth and user management
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+
+# Student self-service portal
+api_router.include_router(student_portal.router, prefix="/student", tags=["student-portal"])
 
 # Guardian endpoints
 api_router.include_router(guardian.router, prefix="/guardians", tags=["guardian"])

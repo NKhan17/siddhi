@@ -107,8 +107,10 @@ class Student(Base, TimestampMixin):
     assistive_devices: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     profile_image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    login_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), unique=True, nullable=True, index=True)
 
     school: Mapped["School"] = relationship("School", back_populates="students")
+    login_user: Mapped[Optional["User"]] = relationship("User")
     guardian_links: Mapped[List["GuardianStudentLink"]] = relationship("GuardianStudentLink", back_populates="student", cascade="all, delete-orphan")
     staff_assignments: Mapped[List["StaffStudentAssignment"]] = relationship("StaffStudentAssignment", back_populates="student", cascade="all, delete-orphan")
     plop_records: Mapped[List["PresentLevelRecord"]] = relationship("PresentLevelRecord", back_populates="student", cascade="all, delete-orphan")
