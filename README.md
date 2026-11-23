@@ -80,11 +80,13 @@ Open `http://localhost:3000/login`. Staff select **School Staff** and sign in wi
 
 ### Student demo login
 
-| Student | Login mode | Admission number | Password |
+| Student | Login mode | Admission number (example) | Password |
 |---|---|---|---|
-| Aarav Patel | Student | ADM-2026-001 | SiddhiStudent2026! |
+| Sample student | Student | `ADM-2026` (or any generated `ADM-xxxx` from the seed) | `StudentPass2026!` |
 
-The account is linked to Aarav's existing synthetic student record. It opens a read-only student portal and exposes only student-facing profile details.
+All synthetic students share the password `StudentPass2026!`. Use the admission number shown in `seed_credentials.json` to log in. The file contains 500 student credentials with their admission numbers, emails, and grades.
+
+You can view the full list at `backend/seed_credentials.json` (included in `.gitignore`).
 
 ### Seeded student profiles
 
