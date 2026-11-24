@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { currentUser, login, logout, refreshSession, requestPasswordReset, resetPassword, selectRole } from '../../../lib/server/auth';
 import { getData, postData, patchData, exportWorkbook } from '../../../lib/server/data';
+import { exportStudentPdf } from '../../../lib/server/studentPdf';
 import { cookies } from 'next/headers';
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -61,7 +62,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
       const user = await currentUser();
       return user ? NextResponse.json(user) : NextResponse.json({ detail: 'Authentication required' }, { status: 401 });
     }
-    return NextResponse.json(await getData(path.slice(1), request));
+    const segments = path.slice(1);
+    if (segments.length === 3 && segments[0] === 'students' && segments[2] === 'pdf') {
+      const { bytes, filename } = await exportStudentPdf(segments[1]);
+      return new NextResponse(Buffer.from(bytes), { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store' } });
+    }
+    return NextResponse.json(await getData(segments, request));
   } catch (error) { return errorResponse(error); }
 }
 
