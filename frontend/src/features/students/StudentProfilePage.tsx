@@ -5,10 +5,10 @@ import { api } from '../../lib/api';
 import type { StudentDetail } from '../../types';
 import { useAuth } from '../../app/AuthContext';
 import { LoadingState, ErrorState, Card, Avatar, Button } from '../../components/ui';
-import { formatDate, ageFromDob } from '../../lib/utils';
+import { formatDate, ageFromDob, getErrorMessage } from '../../lib/utils';
 import {
   BookOpen, TrendingUp, Heart, Settings2, MessageSquare,
-  FileText, Calendar, ClipboardCheck, ChevronRight
+  FileText, Calendar, ClipboardCheck, ChevronRight, Download
 } from 'lucide-react';
 
 function StudentNavLink({
@@ -40,6 +40,8 @@ export default function StudentProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showFullUdid, setShowFullUdid] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const isGuardian = user?.active_role === 'guardian';
 
   const { data: udidRecord, isLoading: isUdidLoading, error: udidError } = useQuery<{ udid_number: string | null }>({
@@ -62,6 +64,23 @@ export default function StudentProfilePage() {
 
   const canEdit = user?.active_role && ['school_admin', 'special_educator', 'school_head'].includes(user.active_role);
 
+  const handleExportPdf = async () => {
+    setPdfError(null);
+    setExportingPdf(true);
+    try {
+      // Cheap logged-in call first: if the short-lived login token has expired, api.ts refreshes it
+      // here, so the plain browser download below doesn't hit a 401.
+      await api.get('/auth/me');
+      // A normal link download (the server sends Content-Disposition: attachment), same as any
+      // other website. The page stays open and the browser saves the file itself.
+      window.location.assign(`/api/v1/students/${student.id}/pdf`);
+    } catch (err) {
+      setPdfError(getErrorMessage(err));
+    } finally {
+      setTimeout(() => setExportingPdf(false), 1500);
+    }
+  };
+
   return (
     <>
       <div className="max-w-4xl mx-auto">
@@ -76,12 +95,18 @@ export default function StudentProfilePage() {
                   {student.grade_class} · {ageFromDob(student.date_of_birth)} years old
                 </p>
               </div>
-              {canEdit && (
-                <Button variant="outline" size="sm" onClick={() => navigate(`/students/${student.id}/edit`)}>
-                  Edit Profile
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <Button variant="outline" size="sm" loading={exportingPdf} onClick={handleExportPdf}>
+                  <Download size={14} /> Export PDF
                 </Button>
-              )}
+                {canEdit && (
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/students/${student.id}/edit`)}>
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
             </div>
+            {pdfError && <p role="alert" className="mt-2 text-sm text-red-700">{pdfError}</p>}
           </div>
         </div>
 
